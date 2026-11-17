@@ -3,7 +3,7 @@ import { reactive } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import SellerNav from '@/Components/SellerNav.vue';
 import OrderStatusBadge from '@/Components/OrderStatusBadge.vue';
-import { rm } from '@/format.js';
+import { itemSummary, rm } from '@/format.js';
 
 const props = defineProps({
     orders: { type: Object, required: true },
@@ -44,7 +44,7 @@ const errors = () => usePage().props.errors;
                     <span class="font-bold">{{ o.number }} <span class="font-normal text-kelabu">· {{ o.buyer.name }}</span></span>
                     <OrderStatusBadge :status="o.status" :label="o.status_label" />
                 </div>
-                <p class="mt-1 text-sm">{{ o.items.map((i) => `${i.quantity}× ${i.product_name}`).join(', ') }}</p>
+                <p class="mt-1 text-sm">{{ itemSummary(o.items) }}</p>
                 <p class="mt-1 text-sm text-kelabu">{{ o.recipient_name }}, {{ o.phone }} — {{ o.address }}, {{ o.postcode }} {{ o.city }}, {{ o.state }}</p>
                 <div class="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-pasir pt-3">
                     <span class="text-sm">

@@ -35,6 +35,13 @@ return [
         ],
     ],
 
+    'bayarcash' => [
+        'token' => env('BAYARCASH_API_TOKEN'),
+        'secret' => env('BAYARCASH_API_SECRET_KEY'),
+        'portal_key' => env('BAYARCASH_PORTAL_KEY'),
+        'sandbox' => (bool) env('BAYARCASH_SANDBOX', true),
+    ],
+
     'livekit' => [
         'url' => env('LIVEKIT_URL'),
         'key' => env('LIVEKIT_API_KEY'),

@@ -13,7 +13,7 @@ class OrderController extends Controller
     {
         return Inertia::render('Orders/Index', [
             'orders' => $request->user()->orders()
-                ->with('shop:id,name,slug', 'items:id,order_id,product_name,quantity,line_total')
+                ->with('shop:id,name,slug', 'items:id,order_id,product_name,size,color,quantity,line_total')
                 ->latest()
                 ->paginate(10),
         ]);
@@ -25,6 +25,7 @@ class OrderController extends Controller
 
         return Inertia::render('Orders/Show', [
             'order' => $order->load('shop:id,name,slug', 'items'),
+            'reviewedProductIds' => $order->reviews()->pluck('product_id'),
         ]);
     }
 }

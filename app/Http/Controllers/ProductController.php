@@ -44,6 +44,7 @@ class ProductController extends Controller
 
         return Inertia::render('Products/Show', [
             'product' => $product,
+            'reviews' => $product->reviews()->with('user:id,name')->latest()->take(20)->get(),
             'related' => Product::where('shop_id', $product->shop_id)
                 ->whereKeyNot($product->id)
                 ->take(4)

@@ -57,11 +57,17 @@ Hadkan route ikut role dengan middleware `role`, contoh `->middleware(['auth', '
 ## Troli, checkout & bayaran
 - `/troli` → `/checkout` (alamat) → bayaran → `/pesanan`
 - Satu bayaran untuk semua kedai; sistem pecahkan jadi **satu pesanan per kedai** (pos RM8 setiap kedai)
-- Bayaran sekarang guna gateway **simulasi** (`PAYMENT_GATEWAY=simulasi`) — pilih "Berjaya" atau "Gagal".
-  Bayarcash akan masuk melalui `App\Services\Payments\PaymentGateway`.
+- Gateway: `PAYMENT_GATEWAY=simulasi` (dev, pilih Berjaya/Gagal) atau `bayarcash` (API v3, FPX/DuitNow).
+  Callback: `POST /bayarcash/callback`, return: `GET /bayarcash/kembali` — kedua-duanya disahkan dengan checksum.
 - Bila bayaran berjaya: stok ditolak, dan ledger `wallet_transactions` rekod jualan untuk kedai,
   **RM1 caj platform** ditolak dari kedai dan masuk ke akaun platform (`shop_id = null`).
   Tetapan dalam `config/marketplace.php`.
+
+## Ciri pembeli & penjual lain
+- Favorit (♡ pada produk, `/favorit`), ikut kedai, ulasan bintang selepas pesanan dihantar ("Saya Dah Terima")
+- Pilihan saiz & warna per produk (penjual isi "S, M, L"), disimpan pada troli & pesanan
+- `/penjual/tetapan`: logo, banner, penerangan, bank
+- Emel: pembeli (bayaran diterima, pesanan dihantar), penjual (pesanan baharu). Dev: `MAIL_MAILER=log` → `storage/logs/laravel.log`
 
 ## Dashboard
 - Penjual `/penjual`: baki, jualan bulan ini, pesanan perlu dihantar, carta 14 hari; `/penjual/pesanan` untuk tanda dihantar + no. tracking
@@ -83,7 +89,7 @@ Hadkan route ikut role dengan middleware `role`, contoh `->middleware(['auth', '
 `/` Utama · `/teroka` (cari, tapis kategori, susun) · `/produk/{slug}` · `/kedai` · `/kedai/{slug}`
 
 ## Belum dibina (papar "Akan Datang")
-`/favorit`, `/ai` — seterusnya: Bayarcash sebenar, withdraw penjual, AI chatbot.
+`/ai` — seterusnya: withdraw penjual, AI chatbot.
 
 ## Test
 ```bash

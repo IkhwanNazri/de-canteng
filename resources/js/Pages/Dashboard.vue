@@ -11,7 +11,7 @@ const shortcuts = computed(() => {
     const common = [
         { icon: 'bag', label: 'Pesanan Saya', href: route('orders.index') },
         { icon: 'cart', label: 'Troli', href: route('cart.index') },
-        { icon: 'heart', label: 'Favorit', href: '/favorit' },
+        { icon: 'heart', label: 'Favorit', href: route('favorites.index') },
         { icon: 'user', label: 'Profil & Keselamatan', href: route('profile.edit') },
     ];
 

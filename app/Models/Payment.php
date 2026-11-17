@@ -40,4 +40,21 @@ class Payment extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    /**
+     * Reference sent to the gateway as order_number (Bayarcash allows max 30 chars).
+     */
+    public function gatewayOrderNumber(): string
+    {
+        return 'DBTP'.$this->id;
+    }
+
+    public static function findByGatewayOrderNumber(string $orderNumber): ?self
+    {
+        if (! preg_match('/^DBTP(\d+)$/', $orderNumber, $matches)) {
+            return null;
+        }
+
+        return self::find((int) $matches[1]);
+    }
 }

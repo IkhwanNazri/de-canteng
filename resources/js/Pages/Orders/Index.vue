@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import OrderStatusBadge from '@/Components/OrderStatusBadge.vue';
-import { rm } from '@/format.js';
+import { itemSummary, rm } from '@/format.js';
 
 defineProps({ orders: { type: Object, required: true } });
 </script>
@@ -22,7 +22,7 @@ defineProps({ orders: { type: Object, required: true } });
                     <span class="font-bold">{{ o.shop.name }}</span>
                     <OrderStatusBadge :status="o.status" :label="o.status_label" />
                 </div>
-                <p class="mt-1 line-clamp-1 text-sm text-kelabu">{{ o.items.map((i) => `${i.quantity}× ${i.product_name}`).join(', ') }}</p>
+                <p class="mt-1 line-clamp-1 text-sm text-kelabu">{{ itemSummary(o.items) }}</p>
                 <div class="mt-2 flex justify-between text-sm">
                     <span class="text-kelabu">{{ o.number }}</span>
                     <span class="font-bold tabular-nums">{{ rm(o.total) }}</span>

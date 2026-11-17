@@ -6,6 +6,7 @@ use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,19 +30,24 @@ class CartController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $product = Product::findOrFail($request->validate(['product_id' => ['required', 'exists:products,id']])['product_id']);
+
         $validated = $request->validate([
-            'product_id' => ['required', 'exists:products,id'],
             'quantity' => ['nullable', 'integer', 'min:1', 'max:99'],
             'buy_now' => ['nullable', 'boolean'],
-        ]);
-
-        $product = Product::findOrFail($validated['product_id']);
+            'size' => $product->sizes ? ['required', Rule::in($product->sizes)] : ['prohibited'],
+            'color' => $product->colors ? ['required', Rule::in($product->colors)] : ['prohibited'],
+        ], ['size.required' => 'Sila pilih saiz.', 'color.required' => 'Sila pilih warna.']);
 
         if ($request->user()->shop?->id === $product->shop_id) {
             return back()->withErrors(['cart' => 'Anda tidak boleh beli produk kedai sendiri.']);
         }
 
-        $item = $request->user()->cartItems()->firstOrNew(['product_id' => $product->id]);
+        $item = $request->user()->cartItems()->firstOrNew([
+            'product_id' => $product->id,
+            'size' => $validated['size'] ?? null,
+            'color' => $validated['color'] ?? null,
+        ]);
         $item->quantity = min($product->stock, ($item->quantity ?? 0) + ($validated['quantity'] ?? 1));
 
         if ($item->quantity < 1) {

@@ -18,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
         ]);
 
+        $middleware->preventRequestForgery(except: ['bayarcash/callback']);
+
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
         ]);

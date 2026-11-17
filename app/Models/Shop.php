@@ -6,6 +6,7 @@ use Database\Factories\ShopFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shop extends Model
@@ -53,5 +54,10 @@ class Shop extends Model
     public function walletBalance(): float
     {
         return (float) $this->walletTransactions()->sum('amount');
+    }
+
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'shop_follows')->withTimestamps();
     }
 }

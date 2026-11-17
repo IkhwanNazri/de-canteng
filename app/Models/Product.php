@@ -6,6 +6,7 @@ use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
@@ -15,7 +16,7 @@ class Product extends Model
 
     protected $fillable = [
         'shop_id', 'category_id', 'name', 'slug', 'description', 'price', 'compare_price',
-        'stock', 'image', 'sold_count', 'rating', 'reviews_count', 'is_featured',
+        'stock', 'sizes', 'colors', 'image', 'sold_count', 'rating', 'reviews_count', 'is_featured',
     ];
 
     protected function casts(): array
@@ -25,6 +26,8 @@ class Product extends Model
             'compare_price' => 'float',
             'rating' => 'float',
             'is_featured' => 'boolean',
+            'sizes' => 'array',
+            'colors' => 'array',
         ];
     }
 
@@ -55,5 +58,21 @@ class Product extends Model
         if ($path = $this->storedImagePath()) {
             Storage::disk('public')->delete($path);
         }
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Recalculate the cached rating and review count from real reviews.
+     */
+    public function refreshRating(): void
+    {
+        $this->update([
+            'rating' => round((float) $this->reviews()->avg('rating'), 1),
+            'reviews_count' => $this->reviews()->count(),
+        ]);
     }
 }

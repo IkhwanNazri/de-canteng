@@ -4,7 +4,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { rm } from '@/format.js';
+import { rm, variantLabel } from '@/format.js';
 
 const props = defineProps({
     items: { type: Array, required: true },
@@ -69,7 +69,7 @@ const cartError = () => usePage().props.errors.cart;
                 <h2 class="mb-3 font-bold">Pesanan ({{ items.length }} item)</h2>
                 <ul class="mb-4 space-y-2 text-sm">
                     <li v-for="item in items" :key="item.id" class="flex justify-between gap-3">
-                        <span class="line-clamp-1">{{ item.quantity }}× {{ item.product.name }}</span>
+                        <span class="line-clamp-1">{{ item.quantity }}× {{ item.product.name }}<template v-if="variantLabel(item)"> ({{ variantLabel(item) }})</template></span>
                         <span class="tabular-nums">{{ rm(item.product.price * item.quantity) }}</span>
                     </li>
                 </ul>

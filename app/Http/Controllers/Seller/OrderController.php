@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Notifications\OrderShippedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -19,7 +20,7 @@ class OrderController extends Controller
 
         return Inertia::render('Seller/Orders/Index', [
             'orders' => $request->user()->shop->orders()
-                ->with('buyer:id,name', 'items:id,order_id,product_name,quantity')
+                ->with('buyer:id,name', 'items:id,order_id,product_name,size,color,quantity')
                 ->when($status, fn ($query) => $query->where('status', $status))
                 ->latest()
                 ->paginate(15)
@@ -41,6 +42,8 @@ class OrderController extends Controller
             'tracking_number' => $validated['tracking_number'],
             'shipped_at' => now(),
         ]);
+
+        $order->buyer->notify(new OrderShippedNotification($order));
 
         return back()->with('success', "Pesanan {$order->number} ditanda sebagai dihantar.");
     }

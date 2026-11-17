@@ -12,7 +12,7 @@ class CartItem extends Model
     /** @use HasFactory<CartItemFactory> */
     use HasFactory;
 
-    protected $fillable = ['user_id', 'product_id', 'quantity'];
+    protected $fillable = ['user_id', 'product_id', 'size', 'color', 'quantity'];
 
     public function user(): BelongsTo
     {

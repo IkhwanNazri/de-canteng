@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CheckoutRequest;
 use App\Services\CheckoutService;
+use App\Services\PaymentProcessor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class CheckoutController extends Controller
@@ -40,10 +43,18 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function store(CheckoutRequest $request, CheckoutService $checkout): HttpResponse
+    public function store(CheckoutRequest $request, CheckoutService $checkout, PaymentProcessor $processor): HttpResponse
     {
         $payment = $checkout->placeOrder($request->user(), $request->validated());
 
-        return Inertia::location($checkout->checkoutUrl($payment));
+        try {
+            return Inertia::location($checkout->checkoutUrl($payment));
+        } catch (RuntimeException $exception) {
+            Log::error($exception->getMessage());
+            $processor->markFailed($payment);
+            $checkout->restoreCart($payment);
+
+            return back()->withErrors(['cart' => 'Gateway bayaran tidak dapat dihubungi. Sila cuba lagi.']);
+        }
     }
 }

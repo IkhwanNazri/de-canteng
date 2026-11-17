@@ -68,6 +68,8 @@ class CheckoutService
                     $order->items()->create([
                         'product_id' => $product->id,
                         'product_name' => $product->name,
+                        'size' => $item->size,
+                        'color' => $item->color,
                         'price' => $product->price,
                         'quantity' => $item->quantity,
                         'line_total' => $product->price * $item->quantity,
@@ -84,6 +86,23 @@ class CheckoutService
         });
     }
 
+    /**
+     * Put the items of an unpaid payment back into the buyer's cart.
+     */
+    public function restoreCart(Payment $payment): void
+    {
+        $payment->loadMissing('orders.items');
+
+        foreach ($payment->orders->flatMap->items as $item) {
+            if ($item->product_id) {
+                CartItem::updateOrCreate(
+                    ['user_id' => $payment->user_id, 'product_id' => $item->product_id, 'size' => $item->size, 'color' => $item->color],
+                    ['quantity' => $item->quantity],
+                );
+            }
+        }
+    }
+
     public function checkoutUrl(Payment $payment): string
     {
         return $this->gateway->checkoutUrl($payment);
@@ -95,12 +114,12 @@ class CheckoutService
      */
     private function ensureStockAvailable(Collection $cartItems, Collection $products): void
     {
-        foreach ($cartItems as $item) {
-            $product = $products[$item->product_id] ?? null;
+        foreach ($cartItems->groupBy('product_id') as $productId => $items) {
+            $product = $products[$productId] ?? null;
 
-            if (! $product || $product->stock < $item->quantity) {
+            if (! $product || $product->stock < $items->sum('quantity')) {
                 throw ValidationException::withMessages([
-                    'cart' => "Stok tidak mencukupi untuk {$item->product?->name}. Sila kemas kini troli.",
+                    'cart' => "Stok tidak mencukupi untuk {$items->first()->product?->name}. Sila kemas kini troli.",
                 ]);
             }
         }

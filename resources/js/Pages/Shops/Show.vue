@@ -1,23 +1,31 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import Icon from '../../Components/Icon.vue';
 import BatikPhoto from '../../Components/BatikPhoto.vue';
 import ProductCard from '../../Components/ProductCard.vue';
 import { compact } from '../../format.js';
 
-defineProps({
+const props = defineProps({
     shop: { type: Object, required: true },
     products: { type: Object, required: true },
     live: { type: Object, default: null },
+    isFollowing: { type: Boolean, default: false },
+    isOwner: { type: Boolean, default: false },
 });
+
+const toggleFollow = () =>
+    usePage().props.auth.user
+        ? router.post(route('shops.follow', props.shop.slug), {}, { preserveScroll: true })
+        : router.visit(route('login'));
 </script>
 
 <template>
     <Head :title="shop.name" />
-    <BatikPhoto :variant="shop.id" :person="false" class="h-40 md:h-56" />
+    <BatikPhoto :src="shop.banner" :alt="`Banner ${shop.name}`" :variant="shop.id" :person="false" class="h-40 md:h-64" />
     <div class="mx-auto max-w-[1200px] px-4">
         <div class="-mt-12 flex flex-col gap-4 rounded-3xl bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] md:flex-row md:items-center md:p-7">
-            <span class="grid size-20 shrink-0 place-items-center rounded-full bg-hijau-gelap">
+            <img v-if="shop.logo" :src="shop.logo" :alt="`Logo ${shop.name}`" class="size-20 shrink-0 rounded-full object-cover ring-4 ring-white" />
+            <span v-else class="grid size-20 shrink-0 place-items-center rounded-full bg-hijau-gelap">
                 <Icon name="sparkle" :size="40" class="text-emas" />
             </span>
             <div class="flex-1">
@@ -35,7 +43,14 @@ defineProps({
                 <Link v-if="live" href="/live" class="flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-2.5 text-sm font-bold text-white">
                     <Icon name="radio" :size="18" :stroke="2" /> Sedang LIVE
                 </Link>
-                <button class="rounded-full bg-emas px-5 py-2.5 text-sm font-semibold text-hijau-gelap">+ Ikut</button>
+                <button
+                    v-if="!isOwner"
+                    class="rounded-full px-5 py-2.5 text-sm font-semibold"
+                    :class="isFollowing ? 'border border-pasir bg-white' : 'bg-emas text-hijau-gelap'"
+                    @click="toggleFollow"
+                >
+                    {{ isFollowing ? '✓ Mengikuti' : '+ Ikut' }}
+                </button>
             </div>
         </div>
 

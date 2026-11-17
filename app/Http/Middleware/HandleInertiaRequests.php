@@ -40,6 +40,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => fn () => $request->user()?->only('id', 'name', 'email', 'role', 'avatar'),
             ],
+            'favoriteProductIds' => fn () => $request->user()?->favoriteProducts()->pluck('products.id') ?? [],
             'cartCount' => fn () => (int) $request->user()?->cartItems()->sum('quantity'),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

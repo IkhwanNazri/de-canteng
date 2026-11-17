@@ -25,6 +25,10 @@ class SaveProductRequest extends FormRequest
             'compare_price' => ['nullable', 'numeric', 'gt:price', 'max:100000'],
             'stock' => ['required', 'integer', 'min:0', 'max:100000'],
             'image' => ['nullable', 'image', 'max:4096'],
+            'sizes' => ['nullable', 'array', 'max:10'],
+            'sizes.*' => ['string', 'max:20', 'distinct'],
+            'colors' => ['nullable', 'array', 'max:10'],
+            'colors.*' => ['string', 'max:30', 'distinct'],
         ];
     }
 
@@ -40,6 +44,21 @@ class SaveProductRequest extends FormRequest
             'compare_price' => 'harga asal',
             'stock' => 'stok',
             'image' => 'gambar',
+            'sizes' => 'saiz',
+            'colors' => 'warna',
         ];
+    }
+
+    /**
+     * Accept "S, M, L" style input as well as arrays, and drop empty values.
+     */
+    protected function prepareForValidation(): void
+    {
+        foreach (['sizes', 'colors'] as $field) {
+            $value = $this->input($field);
+            $items = is_string($value) ? explode(',', $value) : (array) $value;
+            $items = array_values(array_filter(array_map('trim', $items), fn ($item) => $item !== ''));
+            $this->merge([$field => $items ?: null]);
+        }
     }
 }

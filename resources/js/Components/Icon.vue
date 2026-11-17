@@ -24,6 +24,7 @@ const PATHS = {
     check: 'M6 12.5l4 4 8-8.5',
     home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5M10 21v-6h4v6',
     heart: 'M12 20s-9-5.5-9-11.5C3 6 5 4 7.5 4c2 0 3.5 1 4.5 2.5C13 5 14.5 4 16.5 4 19 4 21 6 21 8.5 21 14.5 12 20 12 20z',
+    'heart-fill': 'M12 20s-9-5.5-9-11.5C3 6 5 4 7.5 4c2 0 3.5 1 4.5 2.5C13 5 14.5 4 16.5 4 19 4 21 6 21 8.5 21 14.5 12 20 12 20z',
     menu: 'M4 7h16M4 12h16M4 17h16',
     video: 'M3 6h13v12H3zM16 10l5-3v10l-5-3',
     star: 'M12 3l2.6 5.8 6.4.6-4.8 4.3 1.4 6.3L12 16.8 6.4 20l1.4-6.3L3 9.4l6.4-.6z',
@@ -32,7 +33,7 @@ const PATHS = {
     minus: 'M5 12h14',
     plus: 'M12 5v14M5 12h14',
 };
-const FILLED = ['play', 'star'];
+const FILLED = ['play', 'star', 'heart-fill'];
 
 const d = computed(() => PATHS[props.name] ?? '');
 const filled = computed(() => FILLED.includes(props.name));

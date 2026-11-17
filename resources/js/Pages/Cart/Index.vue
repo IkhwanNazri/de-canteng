@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import BatikPhoto from '@/Components/BatikPhoto.vue';
 import Icon from '@/Components/Icon.vue';
-import { rm } from '@/format.js';
+import { rm, variantLabel } from '@/format.js';
 
 const props = defineProps({
     groups: { type: Array, default: () => [] },
@@ -37,6 +37,7 @@ const remove = (item) => router.delete(route('cart.destroy', item.id), { preserv
                         <BatikPhoto :src="item.product.image" :variant="item.product.id" :person="false" class="size-16 shrink-0 rounded-xl" />
                         <div class="min-w-0 flex-1">
                             <Link :href="route('products.show', item.product.slug)" class="line-clamp-1 font-semibold hover:text-hijau">{{ item.product.name }}</Link>
+                            <p v-if="variantLabel(item)" class="text-xs text-kelabu">{{ variantLabel(item) }}</p>
                             <p class="text-sm font-bold text-hijau-gelap">{{ rm(item.product.price) }}</p>
                             <p v-if="item.quantity >= item.product.stock" class="text-xs text-amber-700">Stok maksimum ({{ item.product.stock }})</p>
                         </div>

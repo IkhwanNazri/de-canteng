@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shop;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,12 +17,14 @@ class ShopController extends Controller
         ]);
     }
 
-    public function show(Shop $shop): Response
+    public function show(Request $request, Shop $shop): Response
     {
         return Inertia::render('Shops/Show', [
-            'shop' => $shop->only('id', 'name', 'slug', 'description', 'logo', 'rating', 'followers_count', 'is_verified'),
+            'shop' => $shop->only('id', 'name', 'slug', 'description', 'logo', 'banner', 'rating', 'followers_count', 'is_verified'),
             'products' => $shop->products()->latest()->paginate(12),
             'live' => $shop->liveSessions()->live()->first(['id', 'title', 'viewers_count']),
+            'isFollowing' => (bool) $request->user()?->followedShops()->whereKey($shop->id)->exists(),
+            'isOwner' => $request->user()?->id === $shop->user_id,
         ]);
     }
 }

@@ -57,6 +57,8 @@ class DatabaseSeeder extends Seeder
                 'rating' => $rating,
                 'followers_count' => $followers,
                 'is_verified' => true,
+                'bank_name' => 'Maybank',
+                'bank_account' => '1640 0000 0000',
             ]);
 
             LiveSession::create([
@@ -96,6 +98,8 @@ class DatabaseSeeder extends Seeder
                 'rating' => [4.9, 4.8, 4.7][$i % 3],
                 'reviews_count' => rand(20, 300),
                 'is_featured' => $i < 4,
+                'sizes' => in_array($catSlug, ['batik-wanita', 'batik-lelaki', 'batik-moden', 'batik-korporat'], true) ? ['S', 'M', 'L', 'XL'] : null,
+                'colors' => $catSlug === 'aksesori-batik' ? null : ['Hijau', 'Biru', 'Coklat'],
             ]);
         }
 
@@ -120,7 +124,12 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach (Product::orderBy('id')->take(6)->get() as $index => $product) {
-            $buyer->cartItems()->create(['product_id' => $product->id, 'quantity' => 1 + $index % 2]);
+            $buyer->cartItems()->create([
+                'product_id' => $product->id,
+                'size' => $product->sizes[1] ?? null,
+                'color' => $product->colors[0] ?? null,
+                'quantity' => 1 + $index % 2,
+            ]);
             $payment = app(CheckoutService::class)->placeOrder($buyer, $address);
             app(PaymentProcessor::class)->markPaid($payment);
 
