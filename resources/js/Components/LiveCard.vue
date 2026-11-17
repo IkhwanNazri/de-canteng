@@ -9,7 +9,7 @@ const VARIANTS = [2, 3, 1];
 </script>
 
 <template>
-    <Link :href="`/live`" class="group block">
+    <Link :href="route('live.show', live.id)" class="group block">
         <BatikPhoto
             :src="live.cover"
             :alt="live.title"

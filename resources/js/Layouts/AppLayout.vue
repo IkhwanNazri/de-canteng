@@ -97,6 +97,15 @@ const FOOTER = [
             </div>
         </header>
 
+        <div
+            v-if="page.props.flash?.success"
+            :key="page.props.flash.success"
+            class="mx-auto mt-4 flex max-w-[1200px] items-center gap-2 rounded-2xl bg-hijau px-5 py-3 text-sm font-semibold text-white shadow"
+            role="status"
+        >
+            <Icon name="check" :size="18" :stroke="2.4" /> {{ page.props.flash.success }}
+        </div>
+
         <main>
             <slot />
         </main>

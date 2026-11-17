@@ -13,6 +13,7 @@ npm install
 cp .env.example .env        # tetapkan DB_* untuk MySQL (DB_DATABASE=debatik)
 php artisan key:generate
 php artisan migrate --seed  # data contoh: 6 kategori, 3 kedai, 9 produk, 3 live
+php artisan storage:link    # untuk gambar produk yang dimuat naik
 composer run dev            # atau: php artisan serve  +  npm run dev
 ```
 
@@ -48,11 +49,28 @@ Auth guna **Laravel Breeze** (Vue + Inertia): `/login`, `/register`, lupa kata l
 Role: `buyer` (default bila daftar), `seller`, `admin` — enum `App\Enums\UserRole`.
 Hadkan route ikut role dengan middleware `role`, contoh `->middleware(['auth', 'role:seller'])`.
 
+## Penjual
+- `/buka-kedai` — pembeli buka kedai (nama, bank) → role jadi `seller`
+- `/penjual/produk` — tambah / edit / padam produk (dengan gambar)
+- `/penjual/live` — cipta sesi live, pilih produk, buka **Studio**
+
+## Live Shopping
+- Studio penjual: Mula/Tamat Live, kamera (LiveKit), **pin produk** (kad keluar atas video penonton),
+  suis **Auto-jawab komen**
+- Penonton `/live/{id}`: video, kad produk dipin + butang Beli, komen (polling 2 saat — tiada server WebSocket)
+- **Auto-jawab**: soalan harga / stok / pos / cara beli dijawab automatik dari data produk dipin.
+  Set `OLLAMA_URL` (cth `http://127.0.0.1:11434`) untuk guna Qwen — kalau AI gagal, jatuh balik ke peraturan.
+
+### Hidupkan video di laptop
+1. Muat turun `livekit-server` (Windows) dari GitHub `livekit/livekit` → Releases, jalankan: `livekit-server --dev`
+2. `.env`: `LIVEKIT_URL=ws://localhost:7880`, `LIVEKIT_API_KEY=devkey`, `LIVEKIT_API_SECRET=secret`
+3. Buka app melalui **http://localhost:8000** (`php artisan serve`) — browser hanya benarkan kamera di `localhost` atau `https`.
+
 ## Halaman siap
 `/` Utama · `/teroka` (cari, tapis kategori, susun) · `/produk/{slug}` · `/kedai` · `/kedai/{slug}`
 
 ## Belum dibina (papar "Akan Datang")
-`/troli`, `/favorit`, `/buka-kedai`, `/live`, `/ai` — Fasa 1 seterusnya: dashboard seller, troli & checkout Bayarcash, ledger komisen RM1.
+`/troli`, `/favorit`, `/ai` — seterusnya: troli & checkout Bayarcash, ledger komisen RM1.
 
 ## Test
 ```bash

@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'livekit' => [
+        'url' => env('LIVEKIT_URL'),
+        'key' => env('LIVEKIT_API_KEY'),
+        'secret' => env('LIVEKIT_API_SECRET'),
+    ],
+
+    'ollama' => [
+        'url' => env('OLLAMA_URL'),
+        'model' => env('OLLAMA_MODEL', 'qwen2.5:3b'),
+    ],
+
 ];

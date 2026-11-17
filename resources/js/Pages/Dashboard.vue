@@ -15,14 +15,18 @@ const shortcuts = computed(() => {
     ];
 
     if (user.value.role === 'seller') {
-        return [{ icon: 'store', label: 'Urus Kedai', href: '/buka-kedai' }, { icon: 'video', label: 'Mula Live', href: '/live' }, ...common];
+        return [
+            { icon: 'store', label: 'Urus Produk', href: route('seller.products.index') },
+            { icon: 'video', label: 'Studio Live', href: route('seller.live.index') },
+            ...common,
+        ];
     }
 
     if (user.value.role === 'admin') {
         return [{ icon: 'shield', label: 'Panel Admin', href: '/ai' }, ...common];
     }
 
-    return [{ icon: 'store', label: 'Buka Kedai Sendiri', href: '/buka-kedai' }, ...common];
+    return [{ icon: 'store', label: 'Buka Kedai Sendiri', href: route('shops.create') }, ...common];
 });
 </script>
 

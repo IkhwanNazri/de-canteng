@@ -96,5 +96,12 @@ class DatabaseSeeder extends Seeder
                 'is_featured' => $i < 4,
             ]);
         }
+
+        foreach ($shops as $shop) {
+            $live = $shop->liveSessions()->first();
+            $productIds = $shop->products()->pluck('id');
+            $live->products()->sync($productIds);
+            $live->update(['pinned_product_id' => $productIds->first()]);
+        }
     }
 }
