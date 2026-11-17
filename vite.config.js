@@ -25,6 +25,10 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    build: {
+        // Sokong iPhone/iPad lama (iOS 15+), bukan hanya iOS 16.4+ (default Vite).
+        target: ['es2020', 'safari15', 'ios15', 'chrome100', 'firefox100', 'edge100'],
+    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./resources/js', import.meta.url)),

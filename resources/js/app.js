@@ -1,3 +1,4 @@
+import './polyfills.js';
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
@@ -15,8 +16,15 @@ createInertiaApp({
         return page;
     },
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
-            .use(plugin)
+        const app = createApp({ render: () => h(App, props) });
+
+        // Ralat semasa render Vue — papar di skrin dalam mod debug (lihat app.blade.php).
+        app.config.errorHandler = (error, instance, info) => {
+            console.error(error);
+            window.__showJsError?.(`Ralat Vue (${info}): ${error?.stack ?? error}`);
+        };
+
+        app.use(plugin)
             .use(ZiggyVue)
             .mount(el);
     },
