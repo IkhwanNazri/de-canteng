@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->preventRequestForgery(except: ['bayarcash/callback']);
 
+        // Di belakang Cloudflare Tunnel / load balancer: set TRUSTED_PROXIES=* supaya URL https betul.
+        if ($proxies = env('TRUSTED_PROXIES')) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : explode(',', $proxies));
+        }
+
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
         ]);
