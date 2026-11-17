@@ -6,9 +6,10 @@ import AppLayout from './Layouts/AppLayout.vue';
 
 createInertiaApp({
     title: (title) => (title ? `${title} · DeBatik` : 'DeBatik — Pasaraya Batik Malaysia'),
-    resolve: (name) => {
-        const pages = import.meta.glob('./Pages/**/*.vue', { eager: true });
-        const page = pages[`./Pages/${name}.vue`];
+    // Setiap halaman dimuat bila diperlukan sahaja (cth: library video live hanya di halaman Live).
+    resolve: async (name) => {
+        const pages = import.meta.glob('./Pages/**/*.vue');
+        const page = await pages[`./Pages/${name}.vue`]();
         // Halaman Auth guna GuestLayout sendiri; yang lain guna layout kedai.
         if (!name.startsWith('Auth/')) {
             page.default.layout ??= AppLayout;
