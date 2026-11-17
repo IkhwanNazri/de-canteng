@@ -14,7 +14,22 @@ const videoEl = ref(null);
 const audioEl = ref(null);
 const state = ref(props.video ? 'connecting' : 'unconfigured');
 const errorMessage = ref('');
+const needsTap = ref(false); // iOS/Safari: bunyi hanya boleh dimainkan selepas pengguna tekan
 let room = null;
+
+const isLocalAddress = (url) => /\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/.test(url);
+const viewerIsRemote = () => !['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+
+const enableSound = async () => {
+    needsTap.value = false;
+    if (videoEl.value) videoEl.value.muted = false;
+    try {
+        await room?.startAudio();
+        await videoEl.value?.play();
+    } catch {
+        needsTap.value = true;
+    }
+};
 
 const attachTrack = (track) => {
     if (track.kind === Track.Kind.Video) {
@@ -28,7 +43,14 @@ const attachTrack = (track) => {
 onMounted(async () => {
     if (!props.video || !props.active) return;
 
+    // Server LiveKit di laptop (localhost) tidak boleh dicapai dari telefon/komputer lain.
+    if (isLocalAddress(props.video.url) && viewerIsRemote()) {
+        state.value = 'unreachable';
+        return;
+    }
+
     room = new Room({ adaptiveStream: true, dynacast: true });
+    room.on(RoomEvent.AudioPlaybackStatusChanged, () => (needsTap.value = !room.canPlaybackAudio));
     room.on(RoomEvent.TrackSubscribed, attachTrack);
     room.on(RoomEvent.TrackUnsubscribed, (track) => track.detach());
     room.on(RoomEvent.Disconnected, () => (state.value = 'ended'));
@@ -46,6 +68,7 @@ onMounted(async () => {
                 participant.trackPublications.forEach((publication) => publication.track && attachTrack(publication.track)),
             );
             if (state.value !== 'playing') state.value = 'waiting';
+            needsTap.value = !room.canPlaybackAudio;
         }
     } catch (error) {
         state.value = 'error';
@@ -61,7 +84,7 @@ onBeforeUnmount(() => room?.disconnect());
 
 <template>
     <div class="relative aspect-[9/16] w-full overflow-hidden rounded-3xl bg-hijau-gelap md:aspect-video">
-        <video ref="videoEl" autoplay playsinline :muted="publish" class="absolute inset-0 size-full object-cover" :class="{ '-scale-x-100': publish }" />
+        <video ref="videoEl" autoplay playsinline muted class="absolute inset-0 size-full object-cover" :class="{ '-scale-x-100': publish }" />
         <audio ref="audioEl" autoplay />
 
         <div v-if="state !== 'playing'" class="absolute inset-0 grid place-items-center p-6 text-center text-white">
@@ -72,10 +95,18 @@ onBeforeUnmount(() => room?.disconnect());
                     <template v-else-if="state === 'connecting'">Menyambung…</template>
                     <template v-else-if="state === 'waiting'">Menunggu penjual mula kamera…</template>
                     <template v-else-if="state === 'ended'">Live tamat.</template>
+                    <template v-else-if="state === 'unreachable'">Video live belum tersedia di pautan ini. Server video perlu di-deploy dahulu — komen & produk masih boleh digunakan.</template>
                     <template v-else>{{ errorMessage }}</template>
                 </p>
             </div>
         </div>
+        <button
+            v-if="needsTap && !publish && state === 'playing'"
+            class="absolute top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/60 px-4 py-2 text-sm font-semibold text-white backdrop-blur"
+            @click="enableSound"
+        >
+            🔇 Tekan untuk bunyi
+        </button>
         <slot />
     </div>
 </template>
