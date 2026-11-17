@@ -20,6 +20,18 @@ let room = null;
 const isLocalAddress = (url) => /\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/.test(url);
 const viewerIsRemote = () => !['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 
+const cameraErrorMessage = (error) => {
+    if (!window.isSecureContext) return 'Kamera hanya boleh dibuka melalui https atau http://127.0.0.1 / localhost.';
+    return (
+        {
+            NotAllowedError: 'Akses kamera ditolak. Klik ikon kamera/kunci di sebelah alamat laman, pilih "Allow", kemudian refresh.',
+            NotFoundError: 'Tiada kamera dijumpai pada komputer ini.',
+            NotReadableError: 'Kamera sedang digunakan oleh aplikasi lain (Zoom, Teams, OBS, kamera Windows). Tutup aplikasi itu dan refresh.',
+            OverconstrainedError: 'Kamera tidak menyokong tetapan video yang diminta.',
+        }[error?.name] ?? `Tidak dapat buka kamera: ${error?.message ?? error}`
+    );
+};
+
 const enableSound = async () => {
     needsTap.value = false;
     if (videoEl.value) videoEl.value.muted = false;
@@ -57,12 +69,21 @@ onMounted(async () => {
 
     try {
         await room.connect(props.video.url, props.video.token);
+    } catch (error) {
+        state.value = 'error';
+        errorMessage.value = `Tidak dapat sambung ke server video (${props.video.url}). Semak LIVEKIT_URL, API key & secret dalam .env, kemudian php artisan config:clear. Ralat: ${error?.message ?? error}`;
+        console.error(error);
+        return;
+    }
 
+    try {
         if (props.publish) {
-            await room.localParticipant.enableCameraAndMicrophone();
+            await room.localParticipant.setCameraEnabled(true);
             const camera = room.localParticipant.getTrackPublication(Track.Source.Camera);
             camera?.videoTrack?.attach(videoEl.value);
             state.value = 'playing';
+            // Mikrofon tidak wajib — live tetap berjalan tanpa bunyi jika gagal.
+            room.localParticipant.setMicrophoneEnabled(true).catch((error) => console.warn('Mikrofon gagal:', error));
         } else {
             room.remoteParticipants.forEach((participant) =>
                 participant.trackPublications.forEach((publication) => publication.track && attachTrack(publication.track)),
@@ -72,9 +93,7 @@ onMounted(async () => {
         }
     } catch (error) {
         state.value = 'error';
-        errorMessage.value = props.publish
-            ? 'Tidak dapat buka kamera/mikrofon. Benarkan akses kamera, dan buka laman melalui https atau localhost.'
-            : 'Tidak dapat sambung ke video live.';
+        errorMessage.value = cameraErrorMessage(error);
         console.error(error);
     }
 });

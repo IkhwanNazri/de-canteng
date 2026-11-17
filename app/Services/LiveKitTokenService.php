@@ -29,7 +29,7 @@ class LiveKitTokenService
             'iss' => config('services.livekit.key'),
             'sub' => $identity,
             'name' => $name,
-            'nbf' => $now,
+            'nbf' => $now - 120, // toleransi jika jam komputer lambat sedikit
             'exp' => $now + 6 * 3600,
             'video' => [
                 'room' => $room,
