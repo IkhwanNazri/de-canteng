@@ -35,12 +35,24 @@ Buka http://localhost:8000. Nak cuba tanpa MySQL? Set `DB_CONNECTION=sqlite` dan
 
 Gambar produk/kategori: isi kolum `image` (URL). Kalau kosong, keluar latar batik placeholder.
 
+## Akaun demo (selepas `migrate --seed`)
+Semua kata laluan: `password`
+
+| Emel | Role |
+|---|---|
+| admin@debatik.test | admin |
+| pembeli@debatik.test | buyer |
+| batik-citra@debatik.test | seller |
+
+Auth guna **Laravel Breeze** (Vue + Inertia): `/login`, `/register`, lupa kata laluan, `/profile`, `/dashboard`.
+Role: `buyer` (default bila daftar), `seller`, `admin` — enum `App\Enums\UserRole`.
+Hadkan route ikut role dengan middleware `role`, contoh `->middleware(['auth', 'role:seller'])`.
+
 ## Halaman siap
 `/` Utama · `/teroka` (cari, tapis kategori, susun) · `/produk/{slug}` · `/kedai` · `/kedai/{slug}`
 
 ## Belum dibina (papar "Akan Datang")
-`/login`, `/daftar`, `/troli`, `/buka-kedai`, `/live`, `/ai` — Fasa 1 seterusnya: auth + role,
-dashboard seller, troli & checkout Bayarcash, ledger komisen RM1.
+`/troli`, `/favorit`, `/buka-kedai`, `/live`, `/ai` — Fasa 1 seterusnya: dashboard seller, troli & checkout Bayarcash, ledger komisen RM1.
 
 ## Test
 ```bash

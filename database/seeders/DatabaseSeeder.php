@@ -17,10 +17,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
+        User::factory()->admin()->create([
             'name' => 'Admin DeBatik',
             'email' => 'admin@debatik.test',
-            'role' => 'admin',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Pembeli Demo',
+            'email' => 'pembeli@debatik.test',
         ]);
 
         $categories = collect([
@@ -38,7 +42,10 @@ class DatabaseSeeder extends Seeder
             ['Kedai Batik Aziz', 4.9, 7600, 439],
         ])->map(function ($data) {
             [$name, $rating, $followers, $viewers] = $data;
-            $seller = User::factory()->create(['name' => "Pemilik {$name}", 'role' => 'seller']);
+            $seller = User::factory()->seller()->create([
+                'name' => "Pemilik {$name}",
+                'email' => Str::slug($name).'@debatik.test',
+            ]);
 
             $shop = Shop::create([
                 'user_id' => $seller->id,

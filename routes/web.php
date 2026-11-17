@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShopController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,10 +19,19 @@ Route::get('/kedai/{shop:slug}', [ShopController::class, 'show'])->name('shops.s
 foreach ([
     'live' => 'Live Shopping',
     'ai' => 'AI DeBatik',
-    'login' => 'Log Masuk',
-    'daftar' => 'Daftar Akaun',
+    'favorit' => 'Favorit',
     'troli' => 'Troli',
     'buka-kedai' => 'Buka Kedai',
 ] as $path => $title) {
     Route::get("/{$path}", fn () => Inertia::render('ComingSoon', ['title' => $title]))->name($path);
 }
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';

@@ -3,6 +3,8 @@ import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import Logo from '../Components/Logo.vue';
 import Icon from '../Components/Icon.vue';
+import Dropdown from '../Components/Dropdown.vue';
+import DropdownLink from '../Components/DropdownLink.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
@@ -66,17 +68,31 @@ const FOOTER = [
                     </Link>
                     <template v-if="!user">
                         <Link
-                            href="/login"
+                            :href="route('login')"
                             class="hidden rounded-full border border-white px-[18px] py-2 text-sm font-semibold text-white hover:bg-white/10 md:block"
                             >Log Masuk</Link
                         >
                         <Link
-                            href="/daftar"
+                            :href="route('register')"
                             class="hidden rounded-full bg-emas px-[22px] py-2 text-sm font-semibold text-hijau-gelap hover:brightness-105 md:block"
                             >Daftar</Link
                         >
                     </template>
-                    <span v-else class="hidden text-sm font-semibold text-white md:block">Hai, {{ user.name }}</span>
+                    <Dropdown v-else align="right" width="48" class="hidden md:block">
+                        <template #trigger>
+                            <button class="flex items-center gap-2 rounded-full border border-white/40 py-1.5 pr-4 pl-1.5 text-sm font-semibold text-white hover:bg-white/10">
+                                <span class="grid size-7 place-items-center rounded-full bg-emas text-xs font-bold text-hijau-gelap">
+                                    {{ user.name.charAt(0).toUpperCase() }}
+                                </span>
+                                {{ user.name }}
+                            </button>
+                        </template>
+                        <template #content>
+                            <DropdownLink :href="route('dashboard')">Akaun Saya</DropdownLink>
+                            <DropdownLink :href="route('profile.edit')">Profil</DropdownLink>
+                            <DropdownLink :href="route('logout')" method="post" as="button">Log Keluar</DropdownLink>
+                        </template>
+                    </Dropdown>
                 </div>
             </div>
         </header>
@@ -150,7 +166,7 @@ const FOOTER = [
             <Link
                 v-for="item in [
                     { label: 'Favorit', href: '/favorit', icon: 'heart' },
-                    { label: 'Akaun', href: '/login', icon: 'user' },
+                    { label: 'Akaun', href: user ? route('dashboard') : route('login'), icon: 'user' },
                 ]"
                 :key="item.href"
                 :href="item.href"

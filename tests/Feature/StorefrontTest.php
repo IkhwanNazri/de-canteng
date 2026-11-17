@@ -10,7 +10,12 @@ class StorefrontTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected bool $seed = true;
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seed();
+    }
 
     public function test_home_shows_categories_lives_and_shops(): void
     {
