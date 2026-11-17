@@ -3,19 +3,22 @@ import { Link, usePage } from '@inertiajs/vue3';
 
 const page = usePage();
 const TABS = [
-    { label: 'Produk', name: 'seller.products.index', prefix: '/penjual/produk' },
-    { label: 'Live', name: 'seller.live.index', prefix: '/penjual/live' },
+    { label: 'Dashboard', name: 'seller.dashboard', match: (url) => url === '/penjual' },
+    { label: 'Pesanan', name: 'seller.orders.index', match: (url) => url.startsWith('/penjual/pesanan') },
+    { label: 'Produk', name: 'seller.products.index', match: (url) => url.startsWith('/penjual/produk') },
+    { label: 'Live', name: 'seller.live.index', match: (url) => url.startsWith('/penjual/live') },
 ];
 </script>
 
 <template>
-    <nav class="mb-6 flex gap-2">
+    <nav class="mb-6 flex gap-2 overflow-x-auto">
         <Link
             v-for="tab in TABS"
             :key="tab.name"
             :href="route(tab.name)"
-            class="rounded-full px-5 py-2 text-sm font-semibold"
-            :class="page.url.startsWith(tab.prefix) ? 'bg-hijau-gelap text-white' : 'bg-white hover:bg-pasir'"
+            prefetch
+            class="shrink-0 rounded-full px-5 py-2 text-sm font-semibold"
+            :class="tab.match(page.url.split('?')[0]) ? 'bg-hijau-gelap text-white' : 'bg-white hover:bg-pasir'"
         >
             {{ tab.label }}
         </Link>

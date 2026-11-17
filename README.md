@@ -54,6 +54,19 @@ Hadkan route ikut role dengan middleware `role`, contoh `->middleware(['auth', '
 - `/penjual/produk` — tambah / edit / padam produk (dengan gambar)
 - `/penjual/live` — cipta sesi live, pilih produk, buka **Studio**
 
+## Troli, checkout & bayaran
+- `/troli` → `/checkout` (alamat) → bayaran → `/pesanan`
+- Satu bayaran untuk semua kedai; sistem pecahkan jadi **satu pesanan per kedai** (pos RM8 setiap kedai)
+- Bayaran sekarang guna gateway **simulasi** (`PAYMENT_GATEWAY=simulasi`) — pilih "Berjaya" atau "Gagal".
+  Bayarcash akan masuk melalui `App\Services\Payments\PaymentGateway`.
+- Bila bayaran berjaya: stok ditolak, dan ledger `wallet_transactions` rekod jualan untuk kedai,
+  **RM1 caj platform** ditolak dari kedai dan masuk ke akaun platform (`shop_id = null`).
+  Tetapan dalam `config/marketplace.php`.
+
+## Dashboard
+- Penjual `/penjual`: baki, jualan bulan ini, pesanan perlu dihantar, carta 14 hari; `/penjual/pesanan` untuk tanda dihantar + no. tracking
+- Admin `/admin`: komisen terkumpul, GMV, kedai teratas, pesanan terkini
+
 ## Live Shopping
 - Studio penjual: Mula/Tamat Live, kamera (LiveKit), **pin produk** (kad keluar atas video penonton),
   suis **Auto-jawab komen**
@@ -70,7 +83,7 @@ Hadkan route ikut role dengan middleware `role`, contoh `->middleware(['auth', '
 `/` Utama · `/teroka` (cari, tapis kategori, susun) · `/produk/{slug}` · `/kedai` · `/kedai/{slug}`
 
 ## Belum dibina (papar "Akan Datang")
-`/troli`, `/favorit`, `/ai` — seterusnya: troli & checkout Bayarcash, ledger komisen RM1.
+`/favorit`, `/ai` — seterusnya: Bayarcash sebenar, withdraw penjual, AI chatbot.
 
 ## Test
 ```bash

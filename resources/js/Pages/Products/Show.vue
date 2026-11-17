@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import Icon from '../../Components/Icon.vue';
 import BatikPhoto from '../../Components/BatikPhoto.vue';
 import ShopCard from '../../Components/ShopCard.vue';
@@ -16,6 +16,17 @@ const SIZES = ['S', 'M', 'L', 'XL'];
 const size = ref('M');
 const variant = ref(0);
 const qty = ref(1);
+const adding = ref(false);
+const cartError = () => usePage().props.errors.cart;
+
+const addToCart = (buyNow = false) => {
+    if (!usePage().props.auth.user) {
+        router.visit(route('login'));
+        return;
+    }
+    adding.value = true;
+    router.post(route('cart.store'), { product_id: props.product.id, quantity: qty.value, buy_now: buyNow }, { preserveScroll: true, onFinish: () => (adding.value = false) });
+};
 const discount = props.product.compare_price
     ? Math.round((1 - props.product.price / props.product.compare_price) * 100)
     : 0;
@@ -83,12 +94,15 @@ const discount = props.product.compare_price
                 </div>
 
                 <div class="mt-6 flex gap-3">
-                    <Link href="/troli" class="grid size-12 place-items-center rounded-full border-2 border-hijau text-hijau" aria-label="Tambah ke troli">
+                    <button :disabled="adding || !product.stock" class="grid size-12 place-items-center rounded-full border-2 border-hijau text-hijau disabled:opacity-40" aria-label="Tambah ke troli" @click="addToCart()">
                         <Icon name="cart" :stroke="2" />
-                    </Link>
-                    <Link href="/troli" class="flex-1 rounded-full bg-hijau py-3 text-center font-semibold text-white hover:bg-hijau-gelap">Beli Sekarang</Link>
+                    </button>
+                    <button :disabled="adding || !product.stock" class="flex-1 rounded-full bg-hijau py-3 text-center font-semibold text-white hover:bg-hijau-gelap disabled:opacity-40" @click="addToCart(true)">
+                        {{ product.stock ? 'Beli Sekarang' : 'Habis Stok' }}
+                    </button>
                 </div>
 
+                <p v-if="cartError()" class="mt-3 text-sm text-red-600">{{ cartError() }}</p>
                 <p class="mt-6 text-sm leading-relaxed text-kelabu">{{ product.description }}</p>
 
                 <ShopCard :shop="product.shop" class="mt-6" />

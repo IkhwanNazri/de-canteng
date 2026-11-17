@@ -48,6 +48,7 @@ const FOOTER = [
                         v-for="item in NAV"
                         :key="item.href"
                         :href="item.href"
+                        prefetch
                         class="relative pb-1.5 text-[15px] text-white transition hover:text-emas"
                         :class="isActive(item.href) ? 'font-semibold' : 'font-medium'"
                     >
@@ -58,7 +59,7 @@ const FOOTER = [
 
                 <div class="ml-auto flex items-center gap-4 md:gap-5">
                     <Link href="/teroka" class="text-white hover:text-emas" aria-label="Cari"><Icon name="search" :size="22" :stroke="2" /></Link>
-                    <Link href="/troli" class="relative text-white hover:text-emas" aria-label="Troli">
+                    <Link :href="user ? route('cart.index') : route('login')" class="relative text-white hover:text-emas" aria-label="Troli">
                         <Icon name="cart" :stroke="2" />
                         <span
                             v-if="cartCount"
@@ -89,6 +90,9 @@ const FOOTER = [
                         </template>
                         <template #content>
                             <DropdownLink :href="route('dashboard')">Akaun Saya</DropdownLink>
+                            <DropdownLink :href="route('orders.index')">Pesanan Saya</DropdownLink>
+                            <DropdownLink v-if="user.role === 'seller'" :href="route('seller.dashboard')">Dashboard Penjual</DropdownLink>
+                            <DropdownLink v-if="user.role === 'admin'" :href="route('admin.dashboard')">Panel Admin</DropdownLink>
                             <DropdownLink :href="route('profile.edit')">Profil</DropdownLink>
                             <DropdownLink :href="route('logout')" method="post" as="button">Log Keluar</DropdownLink>
                         </template>

@@ -7,7 +7,7 @@ const VARIANTS = [0, 1, 4, 2, 3, 2];
 </script>
 
 <template>
-    <Link :href="`/teroka?kategori=${category.slug}`" class="group block">
+    <Link :href="`/teroka?kategori=${category.slug}`" prefetch class="group block">
         <BatikPhoto
             :src="category.image"
             :alt="category.name"

@@ -39,4 +39,19 @@ class Shop extends Model
     {
         return $this->hasMany(LiveSession::class);
     }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
+    public function walletBalance(): float
+    {
+        return (float) $this->walletTransactions()->sum('amount');
+    }
 }

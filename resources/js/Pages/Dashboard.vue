@@ -9,21 +9,22 @@ const ROLE_LABELS = { buyer: 'Pembeli', seller: 'Penjual', admin: 'Admin' };
 
 const shortcuts = computed(() => {
     const common = [
-        { icon: 'bag', label: 'Pesanan Saya', href: '/troli' },
+        { icon: 'bag', label: 'Pesanan Saya', href: route('orders.index') },
+        { icon: 'cart', label: 'Troli', href: route('cart.index') },
         { icon: 'heart', label: 'Favorit', href: '/favorit' },
         { icon: 'user', label: 'Profil & Keselamatan', href: route('profile.edit') },
     ];
 
     if (user.value.role === 'seller') {
         return [
-            { icon: 'store', label: 'Urus Produk', href: route('seller.products.index') },
+            { icon: 'store', label: 'Dashboard Penjual', href: route('seller.dashboard') },
             { icon: 'video', label: 'Studio Live', href: route('seller.live.index') },
             ...common,
         ];
     }
 
     if (user.value.role === 'admin') {
-        return [{ icon: 'shield', label: 'Panel Admin', href: '/ai' }, ...common];
+        return [{ icon: 'shield', label: 'Panel Admin', href: route('admin.dashboard') }, ...common];
     }
 
     return [{ icon: 'store', label: 'Buka Kedai Sendiri', href: route('shops.create') }, ...common];

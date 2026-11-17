@@ -1,11 +1,18 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LiveCommentController;
 use App\Http\Controllers\LiveController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Seller\DashboardController as SellerDashboardController;
 use App\Http\Controllers\Seller\LiveSessionController as SellerLiveSessionController;
+use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ShopRegistrationController;
@@ -24,7 +31,6 @@ Route::get('/kedai/{shop:slug}', [ShopController::class, 'show'])->name('shops.s
 foreach ([
     'ai' => 'AI DeBatik',
     'favorit' => 'Favorit',
-    'troli' => 'Troli',
 ] as $path => $title) {
     Route::get("/{$path}", fn () => Inertia::render('ComingSoon', ['title' => $title]))->name($path);
 }
@@ -38,6 +44,20 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:20,1')
         ->name('live.comments.store');
 
+    Route::get('/troli', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/troli', [CartController::class, 'store'])->name('cart.store');
+    Route::patch('/troli/{cartItem}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/troli/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');
+
+    Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+    Route::get('/bayaran/{payment}/simulasi', [PaymentController::class, 'simulate'])->name('payments.simulate');
+    Route::post('/bayaran/{payment}/simulasi', [PaymentController::class, 'completeSimulation'])->name('payments.simulate.complete');
+
+    Route::get('/pesanan', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/pesanan/{order:number}', [OrderController::class, 'show'])->name('orders.show');
+
     Route::get('/buka-kedai', [ShopRegistrationController::class, 'create'])->name('shops.create');
     Route::post('/buka-kedai', [ShopRegistrationController::class, 'store'])->name('shops.store');
 
@@ -49,6 +69,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('penjual')->name('seller.')->group(function () {
+    Route::get('/', SellerDashboardController::class)->name('dashboard');
+    Route::get('/pesanan', [SellerOrderController::class, 'index'])->name('orders.index');
+    Route::patch('/pesanan/{order}/hantar', [SellerOrderController::class, 'ship'])->name('orders.ship');
+
     Route::resource('produk', SellerProductController::class)
         ->except('show')
         ->parameters(['produk' => 'product'])
@@ -60,6 +84,10 @@ Route::middleware(['auth', 'role:seller'])->prefix('penjual')->name('seller.')->
     Route::patch('/live/{liveSession}', [SellerLiveSessionController::class, 'update'])->name('live.update');
     Route::post('/live/{liveSession}/mula', [SellerLiveSessionController::class, 'start'])->name('live.start');
     Route::post('/live/{liveSession}/tamat', [SellerLiveSessionController::class, 'end'])->name('live.end');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', AdminDashboardController::class)->name('dashboard');
 });
 
 require __DIR__.'/auth.php';

@@ -40,7 +40,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => fn () => $request->user()?->only('id', 'name', 'email', 'role', 'avatar'),
             ],
-            'cartCount' => fn () => 0, // TODO: kira item troli bila modul troli siap
+            'cartCount' => fn () => (int) $request->user()?->cartItems()->sum('quantity'),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
             ],

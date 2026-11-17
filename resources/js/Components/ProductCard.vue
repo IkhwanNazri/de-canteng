@@ -8,7 +8,7 @@ defineProps({ product: { type: Object, required: true } });
 </script>
 
 <template>
-    <Link :href="`/produk/${product.slug}`" class="group block overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+    <Link :href="`/produk/${product.slug}`" prefetch class="group block overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
         <BatikPhoto :src="product.image" :alt="product.name" :variant="product.id" class="aspect-square">
             <span class="absolute top-2.5 right-2.5 grid size-8 place-items-center rounded-full bg-white/90 text-hijau-gelap">
                 <Icon name="heart" :size="17" />

@@ -11,6 +11,7 @@ const LOGO_BG = ['bg-hijau-gelap', 'bg-[#142663]', 'bg-[#4d2e0d]'];
 <template>
     <Link
         :href="`/kedai/${shop.slug}`"
+        prefetch
         class="relative flex items-center gap-4 overflow-hidden rounded-[18px] bg-white p-4 pr-24 shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition hover:-translate-y-0.5 md:p-5 md:pr-24"
     >
         <span class="grid size-14 shrink-0 place-items-center rounded-full md:size-16" :class="LOGO_BG[index % 3]">

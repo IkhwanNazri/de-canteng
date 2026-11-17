@@ -7,6 +7,8 @@ use App\Models\LiveSession;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\User;
+use App\Services\CheckoutService;
+use App\Services\PaymentProcessor;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -22,7 +24,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@debatik.test',
         ]);
 
-        User::factory()->create([
+        $buyer = User::factory()->create([
             'name' => 'Pembeli Demo',
             'email' => 'pembeli@debatik.test',
         ]);
@@ -102,6 +104,28 @@ class DatabaseSeeder extends Seeder
             $productIds = $shop->products()->pluck('id');
             $live->products()->sync($productIds);
             $live->update(['pinned_product_id' => $productIds->first()]);
+        }
+
+        $this->seedDemoOrders($buyer);
+    }
+
+    /**
+     * A few paid orders spread over the last two weeks so dashboards have data.
+     */
+    private function seedDemoOrders(User $buyer): void
+    {
+        $address = [
+            'recipient_name' => 'Pembeli Demo', 'phone' => '012-345 6789', 'address' => '12 Jalan Batik',
+            'postcode' => '20000', 'city' => 'Kuala Terengganu', 'state' => 'Terengganu',
+        ];
+
+        foreach (Product::orderBy('id')->take(6)->get() as $index => $product) {
+            $buyer->cartItems()->create(['product_id' => $product->id, 'quantity' => 1 + $index % 2]);
+            $payment = app(CheckoutService::class)->placeOrder($buyer, $address);
+            app(PaymentProcessor::class)->markPaid($payment);
+
+            $paidAt = now()->subDays(12 - $index * 2)->setTime(10 + $index, 0);
+            $payment->orders()->update(['paid_at' => $paidAt, 'created_at' => $paidAt]);
         }
     }
 }
