@@ -18,12 +18,11 @@ const form = useForm({
     logo: null,
     banner: null,
 });
-const logoPreview = ref(props.shop.logo);
-const bannerPreview = ref(props.shop.banner);
+const previews = ref({ logo: props.shop.logo, banner: props.shop.banner });
 
-const pick = (field, preview) => (event) => {
+const pick = (field, event) => {
     form[field] = event.target.files[0] ?? null;
-    preview.value = form[field] ? URL.createObjectURL(form[field]) : props.shop[field];
+    previews.value[field] = form[field] ? URL.createObjectURL(form[field]) : props.shop[field];
 };
 
 const submit = () => form.post(route('seller.settings.update'), { forceFormData: true, preserveScroll: true, onSuccess: () => form.reset('logo', 'banner') });
@@ -40,20 +39,20 @@ const submit = () => form.post(route('seller.settings.update'), { forceFormData:
             <div>
                 <InputLabel value="Banner (min. lebar 600px)" />
                 <label class="mt-2 block cursor-pointer">
-                    <BatikPhoto :src="bannerPreview" :variant="shop.id" :person="false" class="h-40 rounded-2xl">
+                    <BatikPhoto :src="previews.banner" :variant="shop.id" :person="false" class="h-40 rounded-2xl">
                         <span class="absolute inset-x-0 bottom-0 bg-black/50 py-2 text-center text-xs font-semibold text-white">Tukar Banner</span>
                     </BatikPhoto>
-                    <input type="file" accept="image/*" class="sr-only" @change="pick('banner', bannerPreview)($event)" />
+                    <input type="file" accept="image/*" class="sr-only" @change="pick('banner', $event)" />
                 </label>
                 <InputError :message="form.errors.banner" class="mt-2" />
             </div>
 
             <div class="flex items-center gap-5">
                 <label class="relative block size-24 shrink-0 cursor-pointer overflow-hidden rounded-full bg-hijau-gelap">
-                    <img v-if="logoPreview" :src="logoPreview" alt="Logo" class="size-full object-cover" />
+                    <img v-if="previews.logo" :src="previews.logo" alt="Logo" class="size-full object-cover" />
                     <Icon v-else name="sparkle" :size="40" class="absolute inset-0 m-auto text-emas" />
                     <span class="absolute inset-x-0 bottom-0 bg-black/50 py-1 text-center text-[10px] font-semibold text-white">Tukar</span>
-                    <input type="file" accept="image/*" class="sr-only" @change="pick('logo', logoPreview)($event)" />
+                    <input type="file" accept="image/*" class="sr-only" @change="pick('logo', $event)" />
                 </label>
                 <div>
                     <p class="font-serif text-xl font-bold">{{ shop.name }}</p>

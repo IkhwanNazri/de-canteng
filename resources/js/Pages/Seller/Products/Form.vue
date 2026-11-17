@@ -6,6 +6,7 @@ import InputError from '@/Components/InputError.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import BatikPhoto from '@/Components/BatikPhoto.vue';
+import OptionListInput from '@/Components/OptionListInput.vue';
 
 const props = defineProps({
     product: { type: Object, default: null },
@@ -22,8 +23,8 @@ const form = useForm({
     price: props.product?.price ?? '',
     compare_price: props.product?.compare_price ?? '',
     stock: props.product?.stock ?? 1,
-    sizes: (props.product?.sizes ?? []).join(', '),
-    colors: (props.product?.colors ?? []).join(', '),
+    sizes: [...(props.product?.sizes ?? [])],
+    colors: [...(props.product?.colors ?? [])],
     image: null,
 });
 
@@ -91,19 +92,13 @@ const submit = () => {
                         <InputError :message="form.errors.stock" class="mt-2" />
                     </div>
                 </div>
-                <div class="grid gap-3 md:grid-cols-2">
-                    <div>
-                        <InputLabel for="sizes" value="Saiz (pisahkan dengan koma)" />
-                        <TextInput id="sizes" v-model="form.sizes" placeholder="S, M, L, XL" class="mt-1 block w-full" />
-                        <InputError :message="form.errors.sizes" class="mt-2" />
-                    </div>
-                    <div>
-                        <InputLabel for="colors" value="Warna (pisahkan dengan koma)" />
-                        <TextInput id="colors" v-model="form.colors" placeholder="Hijau, Biru" class="mt-1 block w-full" />
-                        <InputError :message="form.errors.colors" class="mt-2" />
+                <div>
+                    <p class="mb-2 text-sm font-semibold">Variasi <span class="font-normal text-kelabu">(pilihan — kosongkan jika tiada, cth: beg)</span></p>
+                    <div class="grid gap-3 md:grid-cols-2">
+                        <OptionListInput v-model="form.sizes" label="Saiz" field="sizes" placeholder="cth: M" :presets="['XS', 'S', 'M', 'L', 'XL', 'XXL']" :errors="form.errors" />
+                        <OptionListInput v-model="form.colors" label="Warna" field="colors" placeholder="cth: Hijau Zamrud" :errors="form.errors" />
                     </div>
                 </div>
-                <p class="-mt-3 text-xs text-kelabu">Kosongkan jika produk tiada pilihan saiz/warna (cth: beg).</p>
                 <div>
                     <InputLabel for="description" value="Penerangan" />
                     <textarea id="description" v-model="form.description" rows="4" class="mt-1 block w-full rounded-xl border border-pasir px-4 py-2.5 text-sm outline-none focus:border-hijau" />

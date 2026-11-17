@@ -26,6 +26,23 @@ class ProductVariantTest extends TestCase
         $this->assertSame(['Hijau', 'Biru'], $product->colors);
     }
 
+    public function test_seller_form_sends_options_as_a_list(): void
+    {
+        $shop = Shop::factory()->create();
+
+        $this->actingAs($shop->owner)->post(route('seller.products.store'), [
+            'name' => 'Kemeja', 'price' => 99, 'stock' => 4, 'sizes' => ['S', ' L ', ''], 'colors' => [],
+        ])->assertSessionHasNoErrors();
+
+        $product = $shop->products()->sole();
+        $this->assertSame(['S', 'L'], $product->sizes);
+        $this->assertNull($product->colors);
+
+        $this->actingAs($shop->owner)->post(route('seller.products.store'), [
+            'name' => 'Kemeja 2', 'price' => 99, 'stock' => 4, 'sizes' => ['M', 'M'],
+        ])->assertSessionHasErrors('sizes.0');
+    }
+
     public function test_size_and_color_must_be_chosen_from_the_product_options(): void
     {
         $buyer = User::factory()->create();

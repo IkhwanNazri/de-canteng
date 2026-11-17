@@ -23,7 +23,7 @@ const toggleFollow = () =>
     <Head :title="shop.name" />
     <BatikPhoto :src="shop.banner" :alt="`Banner ${shop.name}`" :variant="shop.id" :person="false" class="h-40 md:h-64" />
     <div class="mx-auto max-w-[1200px] px-4">
-        <div class="-mt-12 flex flex-col gap-4 rounded-3xl bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] md:flex-row md:items-center md:p-7">
+        <div class="relative z-10 -mt-12 flex flex-col gap-4 rounded-3xl bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] md:flex-row md:items-center md:p-7">
             <img v-if="shop.logo" :src="shop.logo" :alt="`Logo ${shop.name}`" class="size-20 shrink-0 rounded-full object-cover ring-4 ring-white" />
             <span v-else class="grid size-20 shrink-0 place-items-center rounded-full bg-hijau-gelap">
                 <Icon name="sparkle" :size="40" class="text-emas" />
