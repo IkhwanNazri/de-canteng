@@ -55,6 +55,12 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     /*
+    | Proxy yang dipercayai (cth Cloudflare Tunnel, load balancer). "*" untuk
+    | percaya semua, atau senarai IP dipisahkan koma. Kosong = tiada.
+    */
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------

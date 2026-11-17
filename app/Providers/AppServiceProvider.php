@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Services\Payments\BayarcashGateway;
 use App\Services\Payments\PaymentGateway;
 use App\Services\Payments\SimulatedGateway;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if ($proxies = config('app.trusted_proxies')) {
+            TrustProxies::at($proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
     }
 }
