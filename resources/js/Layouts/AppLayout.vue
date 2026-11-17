@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { computed, onBeforeUnmount, ref } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import Logo from '../Components/Logo.vue';
 import Icon from '../Components/Icon.vue';
 import Dropdown from '../Components/Dropdown.vue';
@@ -9,6 +9,23 @@ import DropdownLink from '../Components/DropdownLink.vue';
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 const cartCount = computed(() => page.props.cartCount ?? 0);
+
+const menuOpen = ref(false);
+const stopListening = router.on('navigate', () => (menuOpen.value = false));
+onBeforeUnmount(stopListening);
+
+const accountLinks = computed(() => {
+    if (!user.value) return [];
+    const links = [
+        { label: 'Akaun Saya', href: route('dashboard'), icon: 'user' },
+        { label: 'Pesanan Saya', href: route('orders.index'), icon: 'bag' },
+        { label: 'Favorit', href: route('favorites.index'), icon: 'heart' },
+    ];
+    if (user.value.role === 'seller') links.push({ label: 'Pusat Penjual', href: route('seller.dashboard'), icon: 'store' });
+    if (user.value.role === 'admin') links.push({ label: 'Panel Admin', href: route('admin.dashboard'), icon: 'shield' });
+    if (user.value.role === 'buyer') links.push({ label: 'Buka Kedai', href: route('shops.create'), icon: 'store' });
+    return links;
+});
 
 const NAV = [
     { label: 'Utama', href: '/' },
@@ -39,7 +56,7 @@ const FOOTER = [
         <!-- Header -->
         <header class="sticky top-0 z-40 bg-hijau-gelap">
             <div class="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-3 md:gap-11 md:px-12 md:py-4">
-                <button class="text-white md:hidden" aria-label="Menu"><Icon name="menu" :stroke="2" /></button>
+                <button class="text-white md:hidden" aria-label="Buka menu" :aria-expanded="menuOpen" @click="menuOpen = true"><Icon name="menu" :stroke="2" /></button>
                 <Logo class="max-md:hidden" />
                 <Logo size="sm" class="md:hidden" />
 
@@ -110,6 +127,56 @@ const FOOTER = [
             <Icon name="check" :size="18" :stroke="2.4" /> {{ page.props.flash.success }}
         </div>
 
+        <!-- Menu laci (mobile) -->
+        <Transition enter-from-class="opacity-0" leave-to-class="opacity-0" enter-active-class="transition-opacity duration-200" leave-active-class="transition-opacity duration-150">
+            <div v-if="menuOpen" class="fixed inset-0 z-50 bg-black/40 md:hidden" @click="menuOpen = false" />
+        </Transition>
+        <Transition enter-from-class="-translate-x-full" leave-to-class="-translate-x-full" enter-active-class="transition-transform duration-200 ease-out" leave-active-class="transition-transform duration-150 ease-in">
+            <aside v-if="menuOpen" class="fixed inset-y-0 left-0 z-50 flex w-[82%] max-w-xs flex-col overflow-y-auto bg-hijau-gelap p-5 text-white md:hidden" aria-label="Menu">
+                <div class="mb-6 flex items-center justify-between">
+                    <Logo size="sm" />
+                    <button aria-label="Tutup menu" class="grid size-9 place-items-center rounded-full bg-white/10" @click="menuOpen = false">✕</button>
+                </div>
+
+                <div v-if="user" class="mb-5 flex items-center gap-3 rounded-2xl bg-white/10 p-3">
+                    <span class="grid size-10 place-items-center rounded-full bg-emas font-bold text-hijau-gelap">{{ user.name.charAt(0).toUpperCase() }}</span>
+                    <span class="min-w-0">
+                        <span class="block truncate font-semibold">{{ user.name }}</span>
+                        <span class="block truncate text-xs text-white/60">{{ user.email }}</span>
+                    </span>
+                </div>
+
+                <nav class="space-y-1">
+                    <Link
+                        v-for="item in NAV"
+                        :key="item.href"
+                        :href="item.href"
+                        class="block rounded-xl px-3 py-2.5 font-semibold"
+                        :class="isActive(item.href) ? 'bg-white/15 text-emas' : 'hover:bg-white/10'"
+                    >
+                        {{ item.label }}
+                    </Link>
+                </nav>
+
+                <template v-if="user">
+                    <p class="mt-6 mb-2 px-3 text-xs font-semibold tracking-wider text-white/50 uppercase">Akaun</p>
+                    <nav class="space-y-1">
+                        <Link v-for="item in accountLinks" :key="item.href" :href="item.href" class="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/10">
+                            <Icon :name="item.icon" :size="18" class="text-emas" /> {{ item.label }}
+                        </Link>
+                        <Link :href="route('profile.edit')" class="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/10">
+                            <Icon name="shield" :size="18" class="text-emas" /> Profil
+                        </Link>
+                    </nav>
+                    <Link :href="route('logout')" method="post" as="button" class="mt-auto w-full rounded-full border border-white/30 py-2.5 text-sm font-semibold">Log Keluar</Link>
+                </template>
+                <div v-else class="mt-auto grid gap-2 pt-6">
+                    <Link :href="route('login')" class="rounded-full border border-white py-2.5 text-center text-sm font-semibold">Log Masuk</Link>
+                    <Link :href="route('register')" class="rounded-full bg-emas py-2.5 text-center text-sm font-semibold text-hijau-gelap">Daftar</Link>
+                </div>
+            </aside>
+        </Transition>
+
         <main>
             <slot />
         </main>
@@ -178,7 +245,7 @@ const FOOTER = [
             </Link>
             <Link
                 v-for="item in [
-                    { label: 'Favorit', href: '/favorit', icon: 'heart' },
+                    { label: 'Favorit', href: user ? route('favorites.index') : route('login'), icon: 'heart' },
                     { label: 'Akaun', href: user ? route('dashboard') : route('login'), icon: 'user' },
                 ]"
                 :key="item.href"

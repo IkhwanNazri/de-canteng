@@ -22,7 +22,9 @@ defineProps({
         <SellerNav />
 
         <div class="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-            <StatTile label="Baki boleh dikeluarkan" :value="rm(stats.balance)" icon="bag" highlight />
+            <Link :href="route('seller.withdrawals.index')" class="block transition hover:-translate-y-0.5">
+                <StatTile label="Baki boleh dikeluarkan · Keluarkan →" :value="rm(stats.balance)" icon="bag" highlight class="h-full" />
+            </Link>
             <StatTile label="Jualan bulan ini" :value="rm(stats.salesThisMonth)" icon="star" />
             <StatTile label="Perlu dihantar" :value="stats.ordersToShip" icon="truck" />
             <StatTile label="Caj platform dibayar" :value="rm(stats.commissionPaid)" icon="shield" />
@@ -49,6 +51,6 @@ defineProps({
                 <p v-if="!recentOrders.length" class="py-6 text-center text-sm text-kelabu">Belum ada pesanan.</p>
             </section>
         </div>
-        <p class="mt-4 text-xs text-kelabu">Caj platform RM1 dipotong untuk setiap pesanan yang dibayar. Ciri pengeluaran (withdraw) akan datang.</p>
+        <p class="mt-4 text-xs text-kelabu">Caj platform RM1 dipotong untuk setiap pesanan yang dibayar.</p>
     </div>
 </template>

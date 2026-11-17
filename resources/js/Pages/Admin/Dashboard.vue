@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import StatTile from '@/Components/StatTile.vue';
+import AdminNav from '@/Components/AdminNav.vue';
 import SalesChart from '@/Components/SalesChart.vue';
 import OrderStatusBadge from '@/Components/OrderStatusBadge.vue';
 import { rm } from '@/format.js';
@@ -17,7 +18,15 @@ defineProps({
     <Head title="Panel Admin" />
     <div class="mx-auto max-w-[1200px] px-4 py-8">
         <p class="text-sm text-kelabu">Panel Admin</p>
-        <h1 class="mb-6 font-serif text-3xl font-bold text-hijau-gelap">Ringkasan DeBatik</h1>
+        <h1 class="mb-4 font-serif text-3xl font-bold text-hijau-gelap">Ringkasan DeBatik</h1>
+        <AdminNav />
+        <Link
+            v-if="stats.pendingWithdrawals"
+            :href="route('admin.withdrawals.index')"
+            class="mb-4 flex items-center justify-between rounded-2xl bg-amber-50 p-4 text-sm font-semibold text-amber-900"
+        >
+            {{ stats.pendingWithdrawals }} permintaan pengeluaran menunggu kelulusan <span>Proses →</span>
+        </Link>
 
         <div class="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4">
             <StatTile label="Komisen terkumpul (RM1/pesanan)" :value="rm(stats.commission)" icon="bag" highlight />

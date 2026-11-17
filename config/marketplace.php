@@ -18,4 +18,9 @@ return [
     */
     'payment_gateway' => env('PAYMENT_GATEWAY', 'simulasi'),
 
+    /*
+    | Jumlah minimum (RM) untuk setiap permintaan pengeluaran penjual.
+    */
+    'withdrawal_minimum' => (float) env('MARKETPLACE_WITHDRAWAL_MINIMUM', 10.00),
+
 ];

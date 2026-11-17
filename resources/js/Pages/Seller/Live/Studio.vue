@@ -30,33 +30,33 @@ const end = () => confirm('Tamatkan live?') && router.post(route('seller.live.en
             <h1 class="font-serif text-2xl font-bold text-hijau-gelap md:text-3xl">{{ session.title }}</h1>
             <span v-if="isLive" class="rounded-md bg-red-600 px-2 py-0.5 text-xs font-bold text-white">LIVE</span>
             <span class="flex items-center gap-1 text-sm text-kelabu"><Icon name="user" :size="15" /> {{ viewers }} tontonan</span>
-            <div class="ml-auto flex gap-2">
+            <div class="flex w-full flex-wrap gap-2 sm:ml-auto sm:w-auto">
                 <a v-if="isLive" :href="route('live.show', session.id)" target="_blank" class="rounded-full bg-white px-4 py-2 text-sm font-semibold">Lihat sebagai penonton</a>
                 <button v-if="session.status !== 'live'" class="rounded-full bg-red-600 px-5 py-2 text-sm font-bold text-white" @click="start">● Mula Live</button>
                 <button v-else class="rounded-full bg-dakwat px-5 py-2 text-sm font-bold text-white" @click="end">Tamat Live</button>
             </div>
         </div>
 
-        <div class="grid gap-5 lg:grid-cols-[1fr_340px]">
-            <div class="space-y-5">
+        <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+            <div class="min-w-0 space-y-5">
                 <LiveVideo :key="session.status" :video="video" publish :active="isLive">
                     <PinnedProduct v-if="pinned" :product="pinned" class="absolute right-3 bottom-3 left-3 md:right-auto md:w-96" />
                 </LiveVideo>
                 <p v-if="!isLive" class="text-sm text-kelabu">Tekan “Mula Live” untuk hidupkan kamera dan buka komen kepada penonton.</p>
 
                 <div class="rounded-3xl bg-white p-5 shadow-sm">
-                    <div class="mb-3 flex items-center justify-between">
+                    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                         <h2 class="font-bold">Produk dalam live — tekan untuk pin</h2>
                         <label class="flex items-center gap-2 text-sm font-semibold">
                             <input type="checkbox" class="size-4 accent-hijau" :checked="session.auto_reply" @change="update({ auto_reply: $event.target.checked })" />
                             Auto-jawab komen
                         </label>
                     </div>
-                    <div class="grid gap-2 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <button
                             v-for="p in session.products"
                             :key="p.id"
-                            class="flex items-center gap-3 rounded-2xl border-2 p-2 text-left transition"
+                            class="flex min-w-0 items-center gap-3 rounded-2xl border-2 p-2 text-left transition"
                             :class="p.id === session.pinned_product_id ? 'border-emas bg-krim' : 'border-transparent bg-krim/50 hover:border-pasir'"
                             @click="update({ pinned_product_id: p.id })"
                         >

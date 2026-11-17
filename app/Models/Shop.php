@@ -60,4 +60,9 @@ class Shop extends Model
     {
         return $this->belongsToMany(User::class, 'shop_follows')->withTimestamps();
     }
+
+    public function withdrawals(): HasMany
+    {
+        return $this->hasMany(Withdrawal::class);
+    }
 }

@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Shop;
 use App\Models\User;
 use App\Models\WalletTransaction;
+use App\Models\Withdrawal;
 use App\Services\SalesReport;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,6 +24,7 @@ class DashboardController extends Controller
                 'orders' => $report->soldOrders()->count(),
                 'buyers' => User::where('role', UserRole::Buyer)->count(),
                 'shops' => Shop::count(),
+                'pendingWithdrawals' => Withdrawal::where('status', 'pending')->count(),
             ],
             'dailySales' => $report->dailySales(14),
             'recentOrders' => Order::with('shop:id,name', 'buyer:id,name')->latest()->take(8)->get(),

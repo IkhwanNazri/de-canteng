@@ -13,7 +13,7 @@ class WalletTransaction extends Model
     /** @use HasFactory<WalletTransactionFactory> */
     use HasFactory;
 
-    protected $fillable = ['shop_id', 'order_id', 'type', 'amount', 'description'];
+    protected $fillable = ['shop_id', 'order_id', 'withdrawal_id', 'type', 'amount', 'description'];
 
     protected function casts(): array
     {

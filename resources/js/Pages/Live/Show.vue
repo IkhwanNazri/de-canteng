@@ -36,7 +36,7 @@ const syncState = (state) => {
         </div>
         <p class="-mt-2 mb-4 text-kelabu">{{ session.title }}</p>
 
-        <div class="grid gap-5 lg:grid-cols-[1fr_340px]">
+        <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
             <LiveVideo :video="video" :active="status === 'live'">
                 <PinnedProduct v-if="pinned" :product="pinned" class="absolute right-3 bottom-3 left-3 md:right-auto md:w-96" />
             </LiveVideo>

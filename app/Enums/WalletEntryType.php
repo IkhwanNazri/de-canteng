@@ -12,4 +12,10 @@ enum WalletEntryType: string
 
     /** RM1 platform fee credited to the platform owner (shop_id is null). */
     case CommissionCredit = 'commission_credit';
+
+    /** Seller balance held for a withdrawal request. */
+    case WithdrawalHold = 'withdrawal_hold';
+
+    /** Held balance returned when a withdrawal is rejected. */
+    case WithdrawalReversal = 'withdrawal_reversal';
 }

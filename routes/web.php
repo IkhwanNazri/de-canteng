@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\BayarcashController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Seller\LiveSessionController as SellerLiveSessionContro
 use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\ShopSettingsController;
+use App\Http\Controllers\Seller\WithdrawalController as SellerWithdrawalController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ShopFollowController;
 use App\Http\Controllers\ShopRegistrationController;
@@ -83,6 +85,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:seller'])->prefix('penjual')->name('seller.')->group(function () {
     Route::get('/', SellerDashboardController::class)->name('dashboard');
+    Route::get('/pengeluaran', [SellerWithdrawalController::class, 'index'])->name('withdrawals.index');
+    Route::post('/pengeluaran', [SellerWithdrawalController::class, 'store'])->name('withdrawals.store');
     Route::get('/tetapan', [ShopSettingsController::class, 'edit'])->name('settings.edit');
     Route::post('/tetapan', [ShopSettingsController::class, 'update'])->name('settings.update');
     Route::get('/pesanan', [SellerOrderController::class, 'index'])->name('orders.index');
@@ -103,6 +107,9 @@ Route::middleware(['auth', 'role:seller'])->prefix('penjual')->name('seller.')->
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
+    Route::get('/pengeluaran', [AdminWithdrawalController::class, 'index'])->name('withdrawals.index');
+    Route::post('/pengeluaran/{withdrawal}/bayar', [AdminWithdrawalController::class, 'pay'])->name('withdrawals.pay');
+    Route::post('/pengeluaran/{withdrawal}/tolak', [AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
 });
 
 require __DIR__.'/auth.php';

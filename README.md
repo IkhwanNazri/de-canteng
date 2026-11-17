@@ -69,6 +69,10 @@ Hadkan route ikut role dengan middleware `role`, contoh `->middleware(['auth', '
 - `/penjual/tetapan`: logo, banner, penerangan, bank
 - Emel: pembeli (bayaran diterima, pesanan dihantar), penjual (pesanan baharu). Dev: `MAIL_MAILER=log` → `storage/logs/laravel.log`
 
+## Pengeluaran (withdraw)
+- Penjual `/penjual/pengeluaran`: mohon keluarkan baki (min RM10, satu permintaan pada satu masa). Jumlah ditahan dari baki serta-merta.
+- Admin `/admin/pengeluaran`: pindah wang secara manual, masukkan rujukan → **Tanda Dibayar**, atau **Tolak** (baki dikembalikan). Penjual dapat emel.
+
 ## Dashboard
 - Penjual `/penjual`: baki, jualan bulan ini, pesanan perlu dihantar, carta 14 hari; `/penjual/pesanan` untuk tanda dihantar + no. tracking
 - Admin `/admin`: komisen terkumpul, GMV, kedai teratas, pesanan terkini
@@ -89,7 +93,7 @@ Hadkan route ikut role dengan middleware `role`, contoh `->middleware(['auth', '
 `/` Utama · `/teroka` (cari, tapis kategori, susun) · `/produk/{slug}` · `/kedai` · `/kedai/{slug}`
 
 ## Belum dibina (papar "Akan Datang")
-`/ai` — seterusnya: withdraw penjual, AI chatbot.
+`/ai` — seterusnya: AI chatbot, deploy VPS.
 
 ## Test
 ```bash

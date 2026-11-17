@@ -7,6 +7,7 @@ const TABS = [
     { label: 'Pesanan', name: 'seller.orders.index', match: (url) => url.startsWith('/penjual/pesanan') },
     { label: 'Produk', name: 'seller.products.index', match: (url) => url.startsWith('/penjual/produk') },
     { label: 'Live', name: 'seller.live.index', match: (url) => url.startsWith('/penjual/live') },
+    { label: 'Pengeluaran', name: 'seller.withdrawals.index', match: (url) => url.startsWith('/penjual/pengeluaran') },
     { label: 'Tetapan Kedai', name: 'seller.settings.edit', match: (url) => url.startsWith('/penjual/tetapan') },
 ];
 </script>
