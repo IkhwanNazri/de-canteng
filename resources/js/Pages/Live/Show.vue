@@ -6,10 +6,12 @@ import LiveChat from '@/Components/LiveChat.vue';
 import PinnedProduct from '@/Components/PinnedProduct.vue';
 import ProductCard from '@/Components/ProductCard.vue';
 import Icon from '@/Components/Icon.vue';
+import VoucherStrip from '@/Components/VoucherStrip.vue';
 
 const props = defineProps({
     session: { type: Object, required: true },
     video: { type: Object, default: null },
+    vouchers: { type: Array, default: () => [] },
 });
 
 const status = ref(props.session.status);
@@ -42,6 +44,8 @@ const syncState = (state) => {
             </LiveVideo>
             <LiveChat :session-id="session.id" :can-comment="status === 'live'" @state="syncState" />
         </div>
+
+        <VoucherStrip v-if="status === 'live'" :vouchers="vouchers" title="🎁 Baucar Live — tuntut sekarang!" class="mt-6" />
 
         <section class="mt-10">
             <h2 class="mb-4 font-serif text-2xl font-bold text-hijau-gelap">Produk dalam live ini</h2>

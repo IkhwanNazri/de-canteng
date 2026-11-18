@@ -16,7 +16,7 @@ class Shop extends Model
 
     protected $fillable = [
         'user_id', 'name', 'slug', 'description', 'logo', 'banner',
-        'rating', 'followers_count', 'is_verified', 'bank_name', 'bank_account',
+        'rating', 'followers_count', 'is_verified', 'bank_name', 'bank_account', 'commission_free_orders', 'referred_by_shop_id',
     ];
 
     protected $hidden = ['bank_name', 'bank_account'];
@@ -64,5 +64,10 @@ class Shop extends Model
     public function withdrawals(): HasMany
     {
         return $this->hasMany(Withdrawal::class);
+    }
+
+    public function vouchers(): HasMany
+    {
+        return $this->hasMany(Voucher::class);
     }
 }

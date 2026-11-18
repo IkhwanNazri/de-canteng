@@ -19,6 +19,7 @@ const accountLinks = computed(() => {
     const links = [
         { label: 'Akaun Saya', href: route('dashboard'), icon: 'user' },
         { label: 'Pesanan Saya', href: route('orders.index'), icon: 'bag' },
+        { label: 'Baucar Saya', href: route('vouchers.index'), icon: 'sparkle' },
         { label: 'Favorit', href: route('favorites.index'), icon: 'heart' },
     ];
     if (user.value.role === 'seller') links.push({ label: 'Pusat Penjual', href: route('seller.dashboard'), icon: 'store' });
@@ -108,6 +109,7 @@ const FOOTER = [
                         <template #content>
                             <DropdownLink :href="route('dashboard')">Akaun Saya</DropdownLink>
                             <DropdownLink :href="route('orders.index')">Pesanan Saya</DropdownLink>
+                            <DropdownLink :href="route('vouchers.index')">Baucar Saya</DropdownLink>
                             <DropdownLink v-if="user.role === 'seller'" :href="route('seller.dashboard')">Dashboard Penjual</DropdownLink>
                             <DropdownLink v-if="user.role === 'admin'" :href="route('admin.dashboard')">Panel Admin</DropdownLink>
                             <DropdownLink :href="route('profile.edit')">Profil</DropdownLink>

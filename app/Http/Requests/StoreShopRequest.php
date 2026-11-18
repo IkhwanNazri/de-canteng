@@ -22,6 +22,7 @@ class StoreShopRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:1000'],
             'bank_name' => ['required', 'string', 'max:60'],
             'bank_account' => ['required', 'string', 'regex:/^[0-9\- ]{6,30}$/'],
+            'referral_code' => ['nullable', 'string', 'max:12'],
         ];
     }
 

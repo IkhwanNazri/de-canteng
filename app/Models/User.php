@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -68,5 +69,25 @@ class User extends Authenticatable
     public function followedShops(): BelongsToMany
     {
         return $this->belongsToMany(Shop::class, 'shop_follows')->withTimestamps();
+    }
+
+    public function vouchers(): HasMany
+    {
+        return $this->hasMany(UserVoucher::class);
+    }
+
+    public function stampEntries(): HasMany
+    {
+        return $this->hasMany(StampEntry::class);
+    }
+
+    public function referrer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referred_by_id');
+    }
+
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(User::class, 'referred_by_id');
     }
 }

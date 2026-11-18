@@ -15,7 +15,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'number', 'payment_id', 'user_id', 'shop_id', 'status', 'subtotal', 'shipping_fee', 'total',
+        'number', 'payment_id', 'user_id', 'shop_id', 'status', 'subtotal', 'shipping_fee', 'shop_discount', 'platform_discount', 'total',
         'commission', 'seller_amount', 'recipient_name', 'phone', 'address', 'postcode', 'city', 'state',
         'tracking_number', 'paid_at', 'shipped_at',
     ];
@@ -28,6 +28,8 @@ class Order extends Model
             'status' => OrderStatus::class,
             'subtotal' => 'float',
             'shipping_fee' => 'float',
+            'shop_discount' => 'float',
+            'platform_discount' => 'float',
             'total' => 'float',
             'commission' => 'float',
             'seller_amount' => 'float',

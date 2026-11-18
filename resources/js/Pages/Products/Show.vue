@@ -6,12 +6,14 @@ import BatikPhoto from '../../Components/BatikPhoto.vue';
 import ShopCard from '../../Components/ShopCard.vue';
 import ProductCard from '../../Components/ProductCard.vue';
 import StarRating from '../../Components/StarRating.vue';
+import VoucherStrip from '../../Components/VoucherStrip.vue';
 import { rm } from '../../format.js';
 
 const props = defineProps({
     product: { type: Object, required: true },
     related: { type: Array, default: () => [] },
     reviews: { type: Array, default: () => [] },
+    vouchers: { type: Array, default: () => [] },
 });
 
 const isFavorite = computed(() => (usePage().props.favoriteProductIds ?? []).includes(props.product.id));
@@ -80,6 +82,8 @@ const discount = props.product.compare_price
                         <span class="rounded-md bg-red-600 px-2 py-0.5 text-xs font-bold text-white">-{{ discount }}%</span>
                     </template>
                 </div>
+
+                <VoucherStrip :vouchers="vouchers" class="mt-5" />
 
                 <template v-if="product.colors?.length">
                     <h2 class="mt-6 text-sm font-semibold">Warna <span class="font-normal text-kelabu">{{ color ?? '— pilih' }}</span></h2>

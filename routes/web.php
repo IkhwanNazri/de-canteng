@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\BayarcashController;
@@ -19,10 +20,12 @@ use App\Http\Controllers\Seller\LiveSessionController as SellerLiveSessionContro
 use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\ShopSettingsController;
+use App\Http\Controllers\Seller\VoucherController as SellerVoucherController;
 use App\Http\Controllers\Seller\WithdrawalController as SellerWithdrawalController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ShopFollowController;
 use App\Http\Controllers\ShopRegistrationController;
+use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -76,7 +79,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/buka-kedai', [ShopRegistrationController::class, 'create'])->name('shops.create');
     Route::post('/buka-kedai', [ShopRegistrationController::class, 'store'])->name('shops.store');
 
-    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
+    Route::get('/dashboard', AccountController::class)->name('dashboard');
+    Route::get('/baucar', [VoucherController::class, 'index'])->name('vouchers.index');
+    Route::post('/baucar/{voucher}/tuntut', [VoucherController::class, 'claim'])->name('vouchers.claim');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -87,6 +92,10 @@ Route::middleware(['auth', 'role:seller'])->prefix('penjual')->name('seller.')->
     Route::get('/', SellerDashboardController::class)->name('dashboard');
     Route::get('/pengeluaran', [SellerWithdrawalController::class, 'index'])->name('withdrawals.index');
     Route::post('/pengeluaran', [SellerWithdrawalController::class, 'store'])->name('withdrawals.store');
+    Route::get('/baucar', [SellerVoucherController::class, 'index'])->name('vouchers.index');
+    Route::get('/baucar/baru', [SellerVoucherController::class, 'create'])->name('vouchers.create');
+    Route::post('/baucar', [SellerVoucherController::class, 'store'])->name('vouchers.store');
+    Route::patch('/baucar/{voucher}/aktif', [SellerVoucherController::class, 'toggle'])->name('vouchers.toggle');
     Route::get('/tetapan', [ShopSettingsController::class, 'edit'])->name('settings.edit');
     Route::post('/tetapan', [ShopSettingsController::class, 'update'])->name('settings.update');
     Route::get('/pesanan', [SellerOrderController::class, 'index'])->name('orders.index');

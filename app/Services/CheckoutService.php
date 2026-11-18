@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\UserVoucher;
 use App\Services\Payments\PaymentGateway;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -17,16 +18,18 @@ use Illuminate\Validation\ValidationException;
 
 class CheckoutService
 {
-    public function __construct(private PaymentGateway $gateway) {}
+    public function __construct(private PaymentGateway $gateway, private VoucherService $vouchers) {}
 
     /**
      * Turn the buyer's cart into one order per shop, all paid by a single payment.
+     * Up to one shop voucher per shop and one platform voucher may be applied.
      *
      * @param  array{recipient_name: string, phone: string, address: string, postcode: string, city: string, state: string}  $shipping
+     * @param  list<int>  $userVoucherIds
      */
-    public function placeOrder(User $buyer, array $shipping): Payment
+    public function placeOrder(User $buyer, array $shipping, array $userVoucherIds = []): Payment
     {
-        return DB::transaction(function () use ($buyer, $shipping) {
+        return DB::transaction(function () use ($buyer, $shipping, $userVoucherIds) {
             $cartItems = $buyer->cartItems()->with('product')->get();
 
             if ($cartItems->isEmpty()) {
@@ -36,7 +39,10 @@ class CheckoutService
             $products = Product::whereKey($cartItems->pluck('product_id'))->lockForUpdate()->get()->keyBy('id');
             $this->ensureStockAvailable($cartItems, $products);
 
-            $shippingFee = (float) config('marketplace.shipping_fee');
+            $drafts = $this->draftOrders($cartItems, $products);
+            $chosen = $this->resolveVouchers($buyer, $userVoucherIds);
+            $this->applyShopVouchers($drafts, $chosen['shop']);
+            $this->applyPlatformVoucher($drafts, $chosen['platform']);
 
             $payment = Payment::create([
                 'reference' => (string) Str::uuid(),
@@ -48,32 +54,25 @@ class CheckoutService
 
             $grandTotal = 0;
 
-            foreach ($cartItems->groupBy(fn (CartItem $item) => $products[$item->product_id]->shop_id) as $shopId => $items) {
-                $subtotal = $items->sum(fn (CartItem $item) => $products[$item->product_id]->price * $item->quantity);
-
+            foreach ($drafts as $draft) {
                 $order = Order::create([
                     ...$shipping,
                     'number' => $this->orderNumber(),
                     'payment_id' => $payment->id,
                     'user_id' => $buyer->id,
-                    'shop_id' => $shopId,
+                    'shop_id' => $draft['shop_id'],
                     'status' => OrderStatus::PendingPayment,
-                    'subtotal' => $subtotal,
-                    'shipping_fee' => $shippingFee,
-                    'total' => $subtotal + $shippingFee,
+                    'subtotal' => $draft['subtotal'],
+                    'shipping_fee' => $draft['shipping_fee'],
+                    'shop_discount' => $draft['shop_discount'],
+                    'platform_discount' => $draft['platform_discount'],
+                    'total' => $draft['subtotal'] + $draft['shipping_fee'] - $draft['shop_discount'] - $draft['platform_discount'],
                 ]);
 
-                foreach ($items as $item) {
-                    $product = $products[$item->product_id];
-                    $order->items()->create([
-                        'product_id' => $product->id,
-                        'product_name' => $product->name,
-                        'size' => $item->size,
-                        'color' => $item->color,
-                        'price' => $product->price,
-                        'quantity' => $item->quantity,
-                        'line_total' => $product->price * $item->quantity,
-                    ]);
+                $order->items()->createMany($draft['lines']);
+
+                foreach ($draft['vouchers'] as $owned) {
+                    $owned->update(['used_at' => now(), 'order_id' => $order->id]);
                 }
 
                 $grandTotal += $order->total;
@@ -106,6 +105,115 @@ class CheckoutService
     public function checkoutUrl(Payment $payment): string
     {
         return $this->gateway->checkoutUrl($payment);
+    }
+
+    /**
+     * @param  Collection<int, CartItem>  $cartItems
+     * @param  Collection<int, Product>  $products
+     * @return array<int, array{shop_id: int, subtotal: float, shipping_fee: float, shop_discount: float, platform_discount: float, lines: list<array<string, mixed>>, vouchers: list<UserVoucher>}>
+     */
+    private function draftOrders(Collection $cartItems, Collection $products): array
+    {
+        $drafts = [];
+
+        foreach ($cartItems->groupBy(fn (CartItem $item) => $products[$item->product_id]->shop_id) as $shopId => $items) {
+            $lines = $items->map(function (CartItem $item) use ($products) {
+                $product = $products[$item->product_id];
+
+                return [
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'size' => $item->size,
+                    'color' => $item->color,
+                    'price' => $product->price,
+                    'quantity' => $item->quantity,
+                    'line_total' => round($product->price * $item->quantity, 2),
+                ];
+            })->values()->all();
+
+            $drafts[$shopId] = [
+                'shop_id' => $shopId,
+                'subtotal' => round(array_sum(array_column($lines, 'line_total')), 2),
+                'shipping_fee' => (float) config('marketplace.shipping_fee'),
+                'shop_discount' => 0.0,
+                'platform_discount' => 0.0,
+                'lines' => $lines,
+                'vouchers' => [],
+            ];
+        }
+
+        return $drafts;
+    }
+
+    /**
+     * @param  list<int>  $userVoucherIds
+     * @return array{shop: Collection<int, UserVoucher>, platform: ?UserVoucher}
+     */
+    private function resolveVouchers(User $buyer, array $userVoucherIds): array
+    {
+        $owned = $userVoucherIds === [] ? collect() : UserVoucher::whereIn('id', $userVoucherIds)
+            ->where('user_id', $buyer->id)
+            ->whereNull('used_at')
+            ->with('voucher.products:id')
+            ->lockForUpdate()
+            ->get();
+
+        if ($owned->count() !== count(array_unique($userVoucherIds)) || $owned->contains(fn (UserVoucher $o) => ! $o->voucher->isUsableNow())) {
+            throw ValidationException::withMessages(['voucher' => 'Baucar tidak sah atau sudah digunakan.']);
+        }
+
+        [$platform, $shop] = $owned->partition(fn (UserVoucher $o) => $o->voucher->isPlatform());
+
+        if ($platform->count() > 1 || $shop->groupBy('voucher.shop_id')->contains(fn ($group) => $group->count() > 1)) {
+            throw ValidationException::withMessages(['voucher' => 'Hanya satu baucar kedai untuk setiap kedai dan satu baucar DeBatik.']);
+        }
+
+        return ['shop' => $shop->keyBy('voucher.shop_id'), 'platform' => $platform->first()];
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $drafts
+     * @param  Collection<int, UserVoucher>  $shopVouchers
+     */
+    private function applyShopVouchers(array &$drafts, Collection $shopVouchers): void
+    {
+        foreach ($shopVouchers as $shopId => $owned) {
+            if (! isset($drafts[$shopId])) {
+                throw ValidationException::withMessages(['voucher' => 'Baucar kedai tidak sepadan dengan item dalam troli.']);
+            }
+
+            $discount = $owned->voucher->discountFor($this->vouchers->eligibleSubtotal($owned->voucher, $drafts[$shopId]['lines']));
+
+            if ($discount <= 0) {
+                throw ValidationException::withMessages(['voucher' => "Belanja minimum untuk baucar {$owned->voucher->code} belum dicapai."]);
+            }
+
+            $drafts[$shopId]['shop_discount'] = $discount;
+            $drafts[$shopId]['vouchers'][] = $owned;
+        }
+    }
+
+    /**
+     * The platform voucher goes to the order with the largest remaining subtotal.
+     *
+     * @param  array<int, array<string, mixed>>  $drafts
+     */
+    private function applyPlatformVoucher(array &$drafts, ?UserVoucher $owned): void
+    {
+        if (! $owned) {
+            return;
+        }
+
+        $target = collect($drafts)->sortByDesc(fn (array $d) => $d['subtotal'] - $d['shop_discount'])->keys()->first();
+        $remaining = $drafts[$target]['subtotal'] - $drafts[$target]['shop_discount'];
+        $discount = min($owned->voucher->discountFor($remaining), $remaining);
+
+        if ($discount <= 0) {
+            throw ValidationException::withMessages(['voucher' => "Belanja minimum untuk baucar {$owned->voucher->code} belum dicapai."]);
+        }
+
+        $drafts[$target]['platform_discount'] = $discount;
+        $drafts[$target]['vouchers'][] = $owned;
     }
 
     /**

@@ -7,6 +7,8 @@ use App\Enums\PaymentStatus;
 use App\Enums\WalletEntryType;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Shop;
+use App\Models\UserVoucher;
 use App\Models\WalletTransaction;
 use App\Notifications\NewOrderNotification;
 use App\Notifications\OrderPaidNotification;
@@ -18,6 +20,8 @@ use Illuminate\Support\Facades\DB;
  */
 class PaymentProcessor
 {
+    public function __construct(private LoyaltyService $loyalty, private ReferralService $referrals) {}
+
     public function markPaid(Payment $payment, ?string $gatewayReference = null): void
     {
         $settled = DB::transaction(function () use ($payment, $gatewayReference) {
@@ -33,7 +37,9 @@ class PaymentProcessor
                 'paid_at' => now(),
             ]);
 
-            $payment->orders()->with('items.product')->each(fn (Order $order) => $this->settleOrder($order));
+            $payment->orders()->with('items.product', 'buyer')->each(fn (Order $order) => $this->settleOrder($order));
+
+            $this->referrals->rewardFirstPurchase($payment->user);
 
             return true;
         });
@@ -63,18 +69,31 @@ class PaymentProcessor
 
             $payment->update(['status' => PaymentStatus::Failed]);
             $payment->orders()->update(['status' => OrderStatus::Cancelled]);
+
+            // Baucar dipulangkan supaya boleh digunakan semula.
+            UserVoucher::whereIn('order_id', $payment->orders()->select('id'))->update(['used_at' => null, 'order_id' => null]);
         });
     }
 
     private function settleOrder(Order $order): void
     {
-        $commission = min((float) config('marketplace.commission_per_order'), $order->total);
+        $shop = Shop::whereKey($order->shop_id)->lockForUpdate()->first();
+
+        // Penjual dibayar harga selepas diskaun kedai; baucar platform ditanggung platform.
+        $sellerGross = $order->total + $order->platform_discount;
+
+        if ($shop->commission_free_orders > 0) {
+            $commission = 0.0;
+            $shop->decrement('commission_free_orders');
+        } else {
+            $commission = min((float) config('marketplace.commission_per_order'), $sellerGross);
+        }
 
         $order->update([
             'status' => OrderStatus::Paid,
             'paid_at' => now(),
             'commission' => $commission,
-            'seller_amount' => $order->total - $commission,
+            'seller_amount' => $sellerGross - $commission,
         ]);
 
         foreach ($order->items as $item) {
@@ -86,11 +105,16 @@ class PaymentProcessor
             }
         }
 
-        $entries = [
-            [$order->shop_id, WalletEntryType::SaleCredit, $order->total, "Jualan {$order->number}"],
-            [$order->shop_id, WalletEntryType::CommissionDebit, -$commission, "Caj platform {$order->number}"],
-            [null, WalletEntryType::CommissionCredit, $commission, "Komisen {$order->number}"],
-        ];
+        $entries = array_filter([
+            [$order->shop_id, WalletEntryType::SaleCredit, $sellerGross, "Jualan {$order->number}"],
+            $commission > 0 ? [$order->shop_id, WalletEntryType::CommissionDebit, -$commission, "Caj platform {$order->number}"] : null,
+            $commission > 0 ? [null, WalletEntryType::CommissionCredit, $commission, "Komisen {$order->number}"] : null,
+            $order->platform_discount > 0 ? [null, WalletEntryType::PlatformVoucherDebit, -$order->platform_discount, "Baucar DeBatik {$order->number}"] : null,
+        ]);
+
+        if ($this->loyalty->qualifies($order)) {
+            $this->loyalty->award($order->buyer, 1, "Pesanan {$order->number}", $order);
+        }
 
         foreach ($entries as [$shopId, $type, $amount, $description]) {
             WalletTransaction::create([

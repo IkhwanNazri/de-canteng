@@ -73,6 +73,16 @@ Hadkan route ikut role dengan middleware `role`, contoh `->middleware(['auth', '
 - Penjual `/penjual/pengeluaran`: mohon keluarkan baki (min RM10, satu permintaan pada satu masa). Jumlah ditahan dari baki serta-merta.
 - Admin `/admin/pengeluaran`: pindah wang secara manual, masukkan rujukan → **Tanda Dibayar**, atau **Tolak** (baki dikembalikan). Penjual dapat emel.
 
+## Referral, kad cop & baucar
+- **Kod referral** (Akaun Saya → Ajak Kawan, link `/register?ref=KOD`)
+  - Pembeli ajak pembeli: selepas pesanan pertama kawan dibayar — pengajak **+2 cop**, kawan **+1 cop**
+  - Penjual ajak penjual (kod dimasukkan di Buka Kedai): kedua-dua kedai **20 pesanan bebas caj RM1**
+- **Kad cop**: 1 cop setiap pesanan dibayar (subjumlah ≥ RM20); **10 cop = baucar DeBatik RM5** (90 hari).
+  Kos ditanggung platform (direkod `platform_voucher_debit`). Tetapan dalam `config/marketplace.php`.
+- **Baucar kedai** (`/penjual/baucar`): Semua produk, Produk terpilih, Pengikut sahaja, Masa live sahaja;
+  RM atau %, belanja minimum, kuantiti, tarikh. Pembeli tuntut di halaman produk/kedai/live → `/baucar`.
+- Checkout: satu baucar kedai setiap kedai + satu baucar DeBatik; baucar dipulangkan jika bayaran gagal.
+
 ## Dashboard
 - Penjual `/penjual`: baki, jualan bulan ini, pesanan perlu dihantar, carta 14 hari; `/penjual/pesanan` untuk tanda dihantar + no. tracking
 - Admin `/admin`: komisen terkumpul, GMV, kedai teratas, pesanan terkini

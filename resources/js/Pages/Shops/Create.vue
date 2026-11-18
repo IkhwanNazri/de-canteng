@@ -6,7 +6,7 @@ import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Icon from '@/Components/Icon.vue';
 
-const form = useForm({ name: '', description: '', bank_name: '', bank_account: '' });
+const form = useForm({ name: '', description: '', bank_name: '', bank_account: '', referral_code: '' });
 const BANKS = ['Maybank', 'CIMB', 'Public Bank', 'RHB', 'Hong Leong', 'AmBank', 'Bank Islam', 'BSN', 'Bank Rakyat', 'Affin', 'Alliance', 'Agrobank'];
 </script>
 
@@ -51,6 +51,12 @@ const BANKS = ['Maybank', 'CIMB', 'Public Bank', 'RHB', 'Hong Leong', 'AmBank', 
                     <TextInput id="bank_account" v-model="form.bank_account" inputmode="numeric" class="mt-1 block w-full" required />
                     <InputError :message="form.errors.bank_account" class="mt-2" />
                 </div>
+            </div>
+            <div>
+                <InputLabel for="referral_code" value="Kod referral penjual (pilihan)" />
+                <TextInput id="referral_code" v-model="form.referral_code" maxlength="12" class="mt-1 block w-full uppercase" placeholder="Kod daripada penjual yang ajak anda" />
+                <p class="mt-1 text-xs text-kelabu">Kedai anda dan kedai yang mengajak dapat 20 pesanan bebas caj platform.</p>
+                <InputError :message="form.errors.referral_code" class="mt-2" />
             </div>
             <PrimaryButton class="w-full" :disabled="form.processing">Buka Kedai</PrimaryButton>
         </form>

@@ -18,4 +18,7 @@ enum WalletEntryType: string
 
     /** Held balance returned when a withdrawal is rejected. */
     case WithdrawalReversal = 'withdrawal_reversal';
+
+    /** Platform pays the seller for a platform voucher used on an order (shop_id is null, negative). */
+    case PlatformVoucherDebit = 'platform_voucher_debit';
 }

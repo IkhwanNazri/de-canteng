@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import Icon from '../../Components/Icon.vue';
 import BatikPhoto from '../../Components/BatikPhoto.vue';
 import ProductCard from '../../Components/ProductCard.vue';
+import VoucherStrip from '../../Components/VoucherStrip.vue';
 import { compact } from '../../format.js';
 
 const props = defineProps({
@@ -11,6 +12,7 @@ const props = defineProps({
     live: { type: Object, default: null },
     isFollowing: { type: Boolean, default: false },
     isOwner: { type: Boolean, default: false },
+    vouchers: { type: Array, default: () => [] },
 });
 
 const toggleFollow = () =>
@@ -53,6 +55,8 @@ const toggleFollow = () =>
                 </button>
             </div>
         </div>
+
+        <VoucherStrip :vouchers="vouchers" title="Baucar Kedai" class="mt-8" />
 
         <h2 class="mt-10 mb-4 font-serif text-2xl font-bold text-hijau-gelap">Produk ({{ products.total }})</h2>
         <div class="grid grid-cols-2 gap-3 pb-12 md:grid-cols-4 md:gap-5">

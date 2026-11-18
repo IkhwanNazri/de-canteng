@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\VoucherScope;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\VoucherService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -38,12 +40,13 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show(Product $product): Response
+    public function show(Request $request, Product $product, VoucherService $vouchers): Response
     {
         $product->load('shop:id,name,slug,logo,rating,followers_count,is_verified', 'category:id,name,slug');
 
         return Inertia::render('Products/Show', [
             'product' => $product,
+            'vouchers' => $vouchers->forDisplay($product->shop, $request->user(), [VoucherScope::Shop, VoucherScope::Product, VoucherScope::Follower], $product),
             'reviews' => $product->reviews()->with('user:id,name')->latest()->take(20)->get(),
             'related' => Product::where('shop_id', $product->shop_id)
                 ->whereKeyNot($product->id)

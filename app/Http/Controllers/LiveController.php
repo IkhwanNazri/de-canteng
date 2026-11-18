@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\VoucherScope;
 use App\Models\LiveSession;
 use App\Services\LiveKitTokenService;
+use App\Services\VoucherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -26,7 +28,7 @@ class LiveController extends Controller
         ]);
     }
 
-    public function show(Request $request, LiveSession $liveSession, LiveKitTokenService $liveKit): Response
+    public function show(Request $request, LiveSession $liveSession, LiveKitTokenService $liveKit, VoucherService $vouchers): Response
     {
         if ($liveSession->isLive()) {
             $liveSession->increment('viewers_count');
@@ -39,6 +41,9 @@ class LiveController extends Controller
 
         return Inertia::render('Live/Show', [
             'session' => $liveSession,
+            'vouchers' => $liveSession->isLive()
+                ? $vouchers->forDisplay($liveSession->shop, $viewer, [VoucherScope::Live, VoucherScope::Shop])
+                : [],
             'video' => $liveSession->isLive() && $liveKit->isConfigured() ? [
                 'url' => $liveKit->url(),
                 'token' => $liveKit->token($liveSession->roomName(), $identity, $viewer?->name ?? 'Tetamu', canPublish: false),

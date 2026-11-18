@@ -20,7 +20,8 @@ class DashboardController extends Controller
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
                 'gmv' => (float) $report->soldOrders()->sum('total'),
-                'commission' => (float) WalletTransaction::whereNull('shop_id')->sum('amount'),
+                'commission' => (float) WalletTransaction::whereNull('shop_id')->where('type', 'commission_credit')->sum('amount'),
+                'voucherCost' => (float) -WalletTransaction::whereNull('shop_id')->where('type', 'platform_voucher_debit')->sum('amount'),
                 'orders' => $report->soldOrders()->count(),
                 'buyers' => User::where('role', UserRole::Buyer)->count(),
                 'shops' => Shop::count(),

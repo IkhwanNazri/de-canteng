@@ -23,4 +23,20 @@ return [
     */
     'withdrawal_minimum' => (float) env('MARKETPLACE_WITHDRAWAL_MINIMUM', 10.00),
 
+    /*
+    | Kad cop: setiap pesanan dibayar (subjumlah >= stamp_min_order) dapat 1 cop.
+    | Cukup stamps_per_card cop => baucar platform bernilai stamp_reward (RM).
+    */
+    'stamp_min_order' => 20.00,
+    'stamps_per_card' => 10,
+    'stamp_reward' => 5.00,
+    'stamp_reward_valid_days' => 90,
+
+    /*
+    | Referral: cop bonus untuk pembeli, dan pesanan bebas caj untuk penjual.
+    */
+    'referral_stamps_referrer' => 2,
+    'referral_stamps_referee' => 1,
+    'referral_commission_free_orders' => 20,
+
 ];

@@ -38,6 +38,8 @@ const date = (value) => (value ? new Date(value).toLocaleString('ms-MY', { dateS
                 </div>
                 <dl class="mt-2 space-y-1 border-t border-pasir pt-3 text-sm">
                     <div class="flex justify-between"><dt>Pos</dt><dd class="tabular-nums">{{ rm(order.shipping_fee) }}</dd></div>
+                    <div v-if="order.shop_discount > 0" class="flex justify-between text-hijau"><dt>Baucar kedai</dt><dd class="tabular-nums">−{{ rm(order.shop_discount) }}</dd></div>
+                    <div v-if="order.platform_discount > 0" class="flex justify-between text-hijau"><dt>Baucar DeBatik</dt><dd class="tabular-nums">−{{ rm(order.platform_discount) }}</dd></div>
                     <div class="flex justify-between font-bold"><dt>Jumlah</dt><dd class="tabular-nums">{{ rm(order.total) }}</dd></div>
                 </dl>
             </section>

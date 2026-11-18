@@ -110,6 +110,7 @@ class DatabaseSeeder extends Seeder
             $live->update(['pinned_product_id' => $productIds->first()]);
         }
 
+        $this->seedDemoVouchers($shops->first());
         $this->seedDemoOrders($buyer);
     }
 
@@ -135,6 +136,32 @@ class DatabaseSeeder extends Seeder
 
             $paidAt = now()->subDays(12 - $index * 2)->setTime(10 + $index, 0);
             $payment->orders()->update(['paid_at' => $paidAt, 'created_at' => $paidAt]);
+        }
+    }
+
+    /**
+     * One voucher of each type for the first demo shop.
+     */
+    private function seedDemoVouchers(Shop $shop): void
+    {
+        $vouchers = [
+            ['RAYA5', 'Diskaun Raya', 'shop', 'fixed', 5, 50],
+            ['IKUT10', 'Khas Pengikut', 'follower', 'percent', 10, 30],
+            ['LIVE15', 'Flash Live', 'live', 'fixed', 15, 100],
+        ];
+
+        foreach ($vouchers as [$code, $name, $scope, $type, $value, $minSpend]) {
+            $shop->vouchers()->create([
+                'code' => $code,
+                'name' => $name,
+                'scope' => $scope,
+                'discount_type' => $type,
+                'discount_value' => $value,
+                'max_discount' => $type === 'percent' ? 20 : null,
+                'min_spend' => $minSpend,
+                'quantity' => 100,
+                'ends_at' => now()->addMonth(),
+            ]);
         }
     }
 }
